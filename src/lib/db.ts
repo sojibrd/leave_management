@@ -51,7 +51,7 @@ export const DEFAULT_HOLIDAYS_2026: Holiday[] = [
 ];
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  employeeName: 'Mohammad Sojib',
+  employeeName: 'Sojib Das',
   employeeId: 'EMP-1042',
   designation: 'Software Engineer',
   department: 'Product & Engineering',

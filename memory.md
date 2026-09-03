@@ -1,80 +1,74 @@
-# Memory — Analytics Dashboard + Quota Expiry Warning
+# Memory — LeaveMaster Personal Leave Management App
 
-Last updated: 2026-09-04 04:32
+Last updated: 2026-09-04 04:58
 
 ## What was built
 
-### আগের সেশন থেকে (restore করা)
-- Full Next.js app with Dexie.js IndexedDB
-- CL/SL/AL/CO leave management
-- Holiday Hacks Engine (dynamic, upcoming-only filter)
-- Email draft, print form, settings
-- `git push` সম্পন্ন (commit: `dae355f`)
+### Core App (আগের সেশন থেকে)
+- **Full Next.js Static Export App** (`src/app/page.tsx`, `src/app/globals.css`)
+- **Client-Side Database** (`src/lib/db.ts`): Dexie.js IndexedDB, pre-seeded 2026 Bangladesh holidays, 4 leave types (CL:10, SL:14, AL:15, CO:2), JSON backup/restore
+- **Core Calculation Engine** (`src/lib/calculator.ts`): working day calc, half-day, `calculateBalances`, `checkLeaveOverlap`, `splitCrossYearLeave`, `findOptimalHolidayBridges`
+- **UI Components**: `Header.tsx`, `BalanceCards.tsx`, `ApplyLeaveModal.tsx`, `LeaveHistoryTable.tsx`, `CalendarView.tsx`, `SettingsModal.tsx`, `NotificationToast.tsx`
+- **Expert Guide Tab** (`ExpertGuideView.tsx`): Holiday Hacks (dynamic, upcoming-only), Edge Case Matrix, Handover Checklist, OOO Templates
 
-### এই সেশনে নতুন যা তৈরি হয়েছে
+### এই সেশনে তৈরি/পরিবর্তন
 
-**1. Quota Expiry Warning System:**
-- `src/lib/calculator.ts`: `calculateExpiryWarnings(balances, targetYear)` ফাংশন যোগ
-  - Interface: `ExpiryWarning` (leaveTypeCode, remainingDays, daysUntilExpiry, urgencyLevel)
-  - Trigger: remaining > 0 AND year-end < 90 দিন বাকি
-  - urgencyLevel: `critical` (<30d) | `warning` (30-60d) | `info` (60-90d)
-- `src/components/BalanceCards.tsx`: expiry warning amber/red badge প্রতিটি card-এ
-  - `selectedYear` prop যোগ
-  - critical level-এ pulse animation
+**Analytics Dashboard (AI):**
+- `src/components/AnalyticsView.tsx` [NEW]: SVG-based monthly bar chart, donut chart by type, stacked progress bars, 6 summary stat cards
+- `src/app/page.tsx`: 5th tab "Analytics" (BarChart2 icon), `AnalyticsView` wire-up
 
-**2. Analytics Dashboard (`src/components/AnalyticsView.tsx`) — নতুন ফাইল:**
-  - 6টি summary stat cards (Quota/Used/Approved/Pending/Rejected/Remaining)
-  - SVG-based monthly bar chart (12 months, current month highlight)
-  - SVG donut chart — leave type breakdown by days used
-  - Stacked progress bar per leave type (approved + pending segments)
-  - কোনো external chart library নেই — pure SVG
+**Quota Expiry Warning (AI):**
+- `src/lib/calculator.ts`: `calculateExpiryWarnings(balances, targetYear)` — triggers when remaining > 0 AND year-end < 90 days, urgencyLevel: critical/warning/info
+- `src/components/BalanceCards.tsx`: `selectedYear` prop যোগ, per-card amber/red expiry badge with pulse animation
 
-**3. Leave Status Tracker:**
-**3. Leave Reason Suggestion Chips (এই সেশনে যোগ হয়েছে):**
-- `src/lib/leaveExamples.ts`: **[NEW]** প্রতিটি leave type-এর জন্য 10টি real-world reason — CL/SL/AL/CO
-- `src/components/ApplyLeaveModal.tsx`:
-  - `showSuggestions` state যোগ
-  - Reason textarea-র নিচে "💡 See 10 real examples for CL" toggle button
-  - Click করলে chips expand, আবার click করলে collapse
-  - Chip click করলে reason field replace (তারপর user edit করতে পারে)
-  - Selected chip highlighted হয় (primary color border)
+**Leave Reason Suggestions (AI):**
+- `src/lib/leaveExamples.ts` [NEW]: CL/SL/AL/CO প্রতিটিতে 10টি real-world reason string
+- `src/components/ApplyLeaveModal.tsx`: "💡 See 10 real examples for CL" toggle, chip grid, click = replace reason field, collapse on select
 
-  - ইতিমধ্যে বিদ্যমান ছিল: `LeaveStatus` type, DB schema, history table dropdown
-  - `ApplyLeaveModal` default status = `'pending'` (আগে থেকেই ছিল)
-  - `calculateBalances()` — pending deducts, rejected skip (আগে থেকেই ছিল)
+**Email Generator fixes (USER):**
+- `src/lib/emailGenerator.ts`: greeting → `"Dear Mr. Adnan & HR Team"` (manager name থেকে dynamic), Employee ID & Department email body থেকে বাদ দেওয়া হয়েছে, `getReturnDateText()` এখন holidays-ও skip করে
 
-**4. `src/app/page.tsx` আপডেট:**
-  - `'analytics'` tab যোগ (5th tab, BarChart2 icon)
-  - `<AnalyticsView>` component wire-up
-  - `<BalanceCards>` এ `selectedYear` pass
+**Settings Modal fixes (USER):**
+- `src/components/SettingsModal.tsx`: `useEffect` দিয়ে settings/leaveTypes prop change sync, Employee ID input field UI থেকে commented out (settings object-এ থাকে)
+
+**DB defaults fix (USER):**
+- `src/lib/db.ts`: `employeeName = 'Sojib Das'`, `managerName = 'Mr. Adnan'`, `managerEmail = 'adnan@company.com'`, `settingsTable` type শুদ্ধ করা, `initializeDatabase()` এ full duplicate cleanup logic যোগ
+
+**README (USER):**
+- `README.md`: সম্পূর্ণ নতুন করে লেখা — features, setup, configuration guide
 
 ## Decisions made
 
-- **No carry-forward**: সব leave type (CL/SL/AL/CO) December 31-এ expire
-- **Expiry warning trigger**: remaining > 0 AND দিন < 90 — current year only
-- **Warning placement**: BalanceCards-এ amber/red inline badge
-- **Charts**: pure SVG — no Recharts or any external lib
-- **Balance rule**: Pending + Approved উভয়ই deduct, Rejected skip
+- **No carry-forward**: সব leave type Dec 31 expire
+- **Pending deducts balance**: Approved + Pending দুটোই count হয়, Rejected skip
+- **Expiry warning**: remaining > 0 AND < 90 days to year-end, current year only
+- **Suggestion chips**: click = replace (not append), collapse after selection
+- **Email signature**: Name + Designation + Company — Employee ID বাদ
+- **Analytics**: Selected year only, pure SVG (no Recharts)
+- **Charts**: no external chart library
 
 ## Problems solved
 
-- Build error থেকে বাঁচতে সব JSX closing bracket সাবধানে করা হয়েছে
-- `BalanceCards` এর নতুন `selectedYear` prop backward-compat ছিল না — page.tsx-এ pass করে ঠিক করা
+- `initializeDatabase()` duplicate leave type bug → full cleanup logic দিয়ে ঠিক করা
+- `settingsTable` type `any` ছিল → `UserSettings` typed করা
+- `getReturnDateText()` holiday skip করত না → holidays param যোগ
+- Email greeting hardcoded ছিল → dynamic `managerName` থেকে
 
 ## Current state
 
-- ✅ `npm.cmd run build` exit code 0 — clean build
 - ✅ `npm run dev` চলছে localhost:3000
-- ✅ 5টি tab: Dashboard, Calendar, History, **Analytics**, Expert Guide
-- ✅ Expiry warning: Dec 31-এর 90 দিন আগে থেকে badge দেখাবে
-- কোনো known bug নেই
+- ✅ Last known good build: exit code 0 (আগের build)
+- ✅ 5 tabs: Dashboard, Calendar, History, Analytics, Expert Guide
+- ✅ Leave apply → reason suggestions toggle → chip click → auto-fill
+- ✅ Expiry warning badge: Oct থেকে BalanceCards-এ দেখাবে
+- ⚠️ `git commit && git push` এই সেশনে করা হয়নি — পরের সেশনে করতে হবে
 
 ## Next session starts with
 
-কোনো pending কাজ নেই। পরবর্তী feature ডেভেলপারের নতুন request অনুযায়ী শুরু হবে।
-`git commit && git push` করা হয়নি এই সেশনে — পরের সেশনে করতে হবে।
+`git add -A && git commit -m "feat: analytics, expiry warnings, reason suggestions, email fixes" && git push origin main`
+তারপর নতুন feature request অনুযায়ী কাজ শুরু।
 
 ## Open questions
 
 - কোনো অমীমাংসিত বিষয় নেই।
-- ভবিষ্যতে বিবেচনা করা যেতে পারে: leave approval email notification, year-over-year analytics comparison
+- ভবিষ্যতে বিবেচনা করা যেতে পারে: leave approval email notification, year-over-year analytics, user-editable reason suggestions
