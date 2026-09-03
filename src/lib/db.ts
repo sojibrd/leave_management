@@ -69,7 +69,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
 export class LeaveDatabase extends Dexie {
   leaves!: EntityTable<LeaveRequest, 'id'>;
   leaveTypes!: EntityTable<LeaveType, 'id'>;
-  settingsTable!: EntityTable<{ key: string; value: any }, 'key'>;
+  settingsTable!: EntityTable<{ key: string; value: UserSettings }, 'key'>;
 
   constructor() {
     super('PersonalLeaveManagementDB');

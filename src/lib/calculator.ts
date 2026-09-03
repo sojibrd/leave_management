@@ -132,7 +132,7 @@ export function calculateBalances(
   // Deduplicate leaves by id to avoid double counting
   const uniqueLeavesMap = new Map<number | string, LeaveRequest>();
   for (const l of leaves) {
-    const key = l.id ? l.id : `${l.leaveTypeCode}-${l.startDate}-${l.endDate}-${l.appliedAt}`;
+    const key = l.id !== undefined ? l.id : `${l.leaveTypeCode}-${l.startDate}-${l.endDate}-${l.appliedAt}`;
     if (!uniqueLeavesMap.has(key)) {
       uniqueLeavesMap.set(key, l);
     }

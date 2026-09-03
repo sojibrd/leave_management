@@ -44,7 +44,7 @@ Leave Details:
 
 ${backupText}
 
-I will resume work on ${getReturnDateText(leave.endDate, settings.weekendDays)}. In case of any urgent query, I will remain accessible via mobile phone or email.
+I will resume work on ${getReturnDateText(leave.endDate, settings.weekendDays, (settings.customHolidays || []).map(h => h.date))}. In case of any urgent query, I will remain accessible via mobile phone or email.
 
 I kindly request you to approve my leave application.
 
@@ -76,16 +76,20 @@ ${settings.companyName}`;
 }
 
 /**
- * Approximate return-to-office date (first non-weekend day after end date)
+ * Approximate return-to-office date (first non-weekend, non-holiday day after end date)
  */
-function getReturnDateText(endDateStr: string, weekendDays: number[]): string {
+function getReturnDateText(endDateStr: string, weekendDays: number[], holidays: string[]): string {
   if (!endDateStr) return 'the next working day';
   const [y, m, d] = endDateStr.split('-').map(Number);
   const nextDate = new Date(y, m - 1, d + 1);
 
-  // If next day is a weekend, advance
+  // Skip weekends and holidays
   let count = 0;
-  while (weekendDays.includes(nextDate.getDay()) && count < 7) {
+  const isNonWorking = (date: Date) => {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return weekendDays.includes(date.getDay()) || holidays.includes(dateStr);
+  };
+  while (isNonWorking(nextDate) && count < 14) {
     nextDate.setDate(nextDate.getDate() + 1);
     count++;
   }

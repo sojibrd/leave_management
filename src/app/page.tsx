@@ -65,8 +65,11 @@ export default function LeaveManagementDashboard() {
     const count = await db.leaves.count();
     if (count === 0) {
       const types = await db.leaveTypes.toArray();
+      // Guard: if no types seeded yet, skip — avoids crash
+      if (types.length < 2) return;
       const cl = types.find((t) => t.code === 'CL') || types[0];
       const sl = types.find((t) => t.code === 'SL') || types[1];
+      if (!cl || !sl) return;
 
       const currentYearStr = String(new Date().getFullYear());
 
@@ -206,9 +209,19 @@ export default function LeaveManagementDashboard() {
   };
 
   const handleUpdateLeaveTypeQuota = async (typeId: number, newQuota: number) => {
-    await db.leaveTypes.update(typeId, { totalQuota: newQuota });
-    const allTypes = await db.leaveTypes.toArray();
-    setLeaveTypes(allTypes);
+    try {
+      await db.leaveTypes.update(typeId, { totalQuota: newQuota });
+      const allTypes = await db.leaveTypes.toArray();
+      // Deduplicate by code (consistent with loadData)
+      const uniqueTypesMap = new Map<string, LeaveType>();
+      for (const t of allTypes) {
+        if (!uniqueTypesMap.has(t.code)) uniqueTypesMap.set(t.code, t);
+      }
+      setLeaveTypes(Array.from(uniqueTypesMap.values()));
+    } catch (err) {
+      console.error('Failed to update quota:', err);
+      showToast('Failed to update leave quota.', 'error');
+    }
   };
 
   const handleExportJson = async () => {
@@ -245,15 +258,22 @@ export default function LeaveManagementDashboard() {
   };
 
   const handleResetDemoData = async () => {
-    await db.leaves.clear();
-    await db.leaveTypes.clear();
-    for (const lt of DEFAULT_LEAVE_TYPES) {
-      await db.leaveTypes.add(lt as LeaveType);
+    try {
+      await db.transaction('rw', db.leaves, db.leaveTypes, db.settingsTable, async () => {
+        await db.leaves.clear();
+        await db.leaveTypes.clear();
+        for (const lt of DEFAULT_LEAVE_TYPES) {
+          await db.leaveTypes.add(lt as LeaveType);
+        }
+      });
+      await saveSettings(DEFAULT_SETTINGS);
+      await seedDemoLeavesIfEmpty();
+      await loadData();
+      showToast('Database reset to defaults.', 'info');
+    } catch (err) {
+      console.error('Reset failed:', err);
+      showToast('Failed to reset database. Please try again.', 'error');
     }
-    await saveSettings(DEFAULT_SETTINGS);
-    await seedDemoLeavesIfEmpty();
-    await loadData();
-    showToast('Database reset to defaults.', 'info');
   };
 
   const handleViewEmailDraft = (leave: LeaveRequest) => {
@@ -282,7 +302,11 @@ export default function LeaveManagementDashboard() {
           display: 'flex',
           alignItems: 'center',
           gap: '0.625rem',
-          backgroundColor: toast.type === 'success' ? '#065f46' : toast.type === 'error' ? '#9f1239' : '#1e293b',
+          backgroundColor: toast.type === 'success'
+            ? 'var(--toast-success-bg)'
+            : toast.type === 'error'
+            ? 'var(--toast-error-bg)'
+            : 'var(--toast-info-bg)',
           color: '#ffffff',
           padding: '0.75rem 1.25rem',
           borderRadius: 'var(--radius-md)',
@@ -291,9 +315,9 @@ export default function LeaveManagementDashboard() {
           fontWeight: 600,
           animation: 'fadeIn 0.2s ease-out'
         }}>
-          {toast.type === 'success' && <CheckCircle size={18} color="#34d399" />}
-          {toast.type === 'error' && <AlertTriangle size={18} color="#f87171" />}
-          {toast.type === 'info' && <Info size={18} color="#60a5fa" />}
+          {toast.type === 'success' && <CheckCircle size={18} color="var(--toast-success-icon)" />}
+          {toast.type === 'error' && <AlertTriangle size={18} color="var(--toast-error-icon)" />}
+          {toast.type === 'info' && <Info size={18} color="var(--toast-info-icon)" />}
           <span>{toast.message}</span>
         </div>
       )}
@@ -338,7 +362,7 @@ export default function LeaveManagementDashboard() {
           className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
         >
           <History size={16} />
-          <span>Application History ({leaves.length})</span>
+          <span>Application History ({leaves.filter(l => new Date(l.startDate).getFullYear() === selectedYear).length})</span>
         </button>
       </div>
 

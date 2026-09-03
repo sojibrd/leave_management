@@ -56,6 +56,23 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
     }
   }, [preselectedType, uniqueLeaveTypes, selectedTypeId]);
 
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setStartDate(todayStr);
+      setEndDate(todayStr);
+      setIsHalfDay(false);
+      setHalfDayPeriod('first-half');
+      setReason('');
+      setBackupPerson('');
+      setBackupContact('');
+      setAttachments([]);
+      setError('');
+      setIsSubmitting(false);
+      setSelectedTypeId(0);
+    }
+  }, [isOpen, todayStr]);
+
   // If start date is after end date, automatically sync end date to start date
   const handleStartDateChange = (val: string) => {
     setStartDate(val);

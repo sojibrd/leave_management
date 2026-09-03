@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Holiday, LeaveType, UserSettings } from '../types/leave';
 import { X, Save, User, Briefcase, Calendar, ShieldAlert, Plus, Trash2 } from 'lucide-react';
 
@@ -38,6 +38,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [quotas, setQuotas] = useState<Record<number, number>>(
     leaveTypes.reduce((acc, lt) => ({ ...acc, [lt.id!]: lt.totalQuota }), {})
   );
+
+  // Sync formData and quotas whenever settings/leaveTypes props change (e.g. after quota update)
+  useEffect(() => {
+    setFormData({ ...settings });
+  }, [settings]);
+
+  useEffect(() => {
+    setQuotas(leaveTypes.reduce((acc, lt) => ({ ...acc, [lt.id!]: lt.totalQuota }), {}));
+  }, [leaveTypes]);
 
   // New holiday input state
   const [newHolidayDate, setNewHolidayDate] = useState('');
