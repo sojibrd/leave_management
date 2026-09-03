@@ -1,69 +1,80 @@
-# Memory — Personal Leave Management Application
+# Memory — Analytics Dashboard + Quota Expiry Warning
 
-Last updated: 2026-09-04 03:42
+Last updated: 2026-09-04 04:32
 
 ## What was built
 
-- **Full Next.js Single Page App (Static Export for GitHub Pages)**:
-  - `src/app/page.tsx`: Central dashboard orchestrating state, tabs (Dashboard, Calendar, History), modals, theme toggling, and notifications.
-  - `src/app/globals.css`: Comprehensive Vanilla CSS design system with light/dark theme variables, glassmorphism, responsive grid, and accessible form controls.
-- **Client-Side Database (`src/lib/db.ts`)**:
-  - Dexie.js IndexedDB schema with tables for `leaves`, `leaveTypes`, and `settingsTable`.
-  - Pre-seeded 2026 Bangladesh public holidays, 4 default leave types (CL: 10, SL: 14, AL: 15, CO: 2 = 41 total days), and employee settings.
-  - Robust JSON backup/export and restore/import utilities with validation.
-  - Automatic duplicate detection and cleanup for both leave types and leave records.
-- **Core Calculation Engine (`src/lib/calculator.ts`)**:
-  - Working day calculator excluding configurable weekends (Fri/Sat or Sat/Sun) and public holidays.
-  - Accurate half-day handling (0.5 day deduction, first-half / second-half).
-  - `calculateBalances`: Deduplicates leave types and records, sums approved & pending days, and calculates `remainingDays = totalQuota - approvedDays - pendingDays`.
-- **Email Draft & Printable Application (`src/lib/emailGenerator.ts`, `PrintableLeaveForm.tsx`)**:
-  - Exact requested greeting: `Dear Mr. Adnan & HR Team,` with backup handover info and return-to-office date skipping holidays.
-  - One-click `mailto:` generator and paper-ready printable application with official signature blocks.
-- **UI Components (`src/components/`)**:
-  - `Header.tsx`: Theme toggle, JSON backup/restore buttons, year selector.
-  - `BalanceCards.tsx`: Overview metric banner and cards per category with progress bars.
-  - `ApplyLeaveModal.tsx`: Real-time day calculator, category selector, file attachment uploader, auto-reset on close.
-  - `CalendarView.tsx`: Interactive monthly calendar with colored date badges and quick details.
-  - `LeaveHistoryTable.tsx`: Search, status filter, inline status switcher (`Pending`, `Approved`, `Rejected`), delete, email draft viewer, and print trigger.
-  - `SettingsModal.tsx`: Employee profile, manager/HR emails, weekend presets, custom holiday management, quota editor, and database reset.
-- **CI/CD Workflow (`.github/workflows/deploy.yml`)**:
-  - GitHub Actions workflow building with Node 22 and deploying to GitHub Pages.
+### আগের সেশন থেকে (restore করা)
+- Full Next.js app with Dexie.js IndexedDB
+- CL/SL/AL/CO leave management
+- Holiday Hacks Engine (dynamic, upcoming-only filter)
+- Email draft, print form, settings
+- `git push` সম্পন্ন (commit: `dae355f`)
+
+### এই সেশনে নতুন যা তৈরি হয়েছে
+
+**1. Quota Expiry Warning System:**
+- `src/lib/calculator.ts`: `calculateExpiryWarnings(balances, targetYear)` ফাংশন যোগ
+  - Interface: `ExpiryWarning` (leaveTypeCode, remainingDays, daysUntilExpiry, urgencyLevel)
+  - Trigger: remaining > 0 AND year-end < 90 দিন বাকি
+  - urgencyLevel: `critical` (<30d) | `warning` (30-60d) | `info` (60-90d)
+- `src/components/BalanceCards.tsx`: expiry warning amber/red badge প্রতিটি card-এ
+  - `selectedYear` prop যোগ
+  - critical level-এ pulse animation
+
+**2. Analytics Dashboard (`src/components/AnalyticsView.tsx`) — নতুন ফাইল:**
+  - 6টি summary stat cards (Quota/Used/Approved/Pending/Rejected/Remaining)
+  - SVG-based monthly bar chart (12 months, current month highlight)
+  - SVG donut chart — leave type breakdown by days used
+  - Stacked progress bar per leave type (approved + pending segments)
+  - কোনো external chart library নেই — pure SVG
+
+**3. Leave Status Tracker:**
+**3. Leave Reason Suggestion Chips (এই সেশনে যোগ হয়েছে):**
+- `src/lib/leaveExamples.ts`: **[NEW]** প্রতিটি leave type-এর জন্য 10টি real-world reason — CL/SL/AL/CO
+- `src/components/ApplyLeaveModal.tsx`:
+  - `showSuggestions` state যোগ
+  - Reason textarea-র নিচে "💡 See 10 real examples for CL" toggle button
+  - Click করলে chips expand, আবার click করলে collapse
+  - Chip click করলে reason field replace (তারপর user edit করতে পারে)
+  - Selected chip highlighted হয় (primary color border)
+
+  - ইতিমধ্যে বিদ্যমান ছিল: `LeaveStatus` type, DB schema, history table dropdown
+  - `ApplyLeaveModal` default status = `'pending'` (আগে থেকেই ছিল)
+  - `calculateBalances()` — pending deducts, rejected skip (আগে থেকেই ছিল)
+
+**4. `src/app/page.tsx` আপডেট:**
+  - `'analytics'` tab যোগ (5th tab, BarChart2 icon)
+  - `<AnalyticsView>` component wire-up
+  - `<BalanceCards>` এ `selectedYear` pass
 
 ## Decisions made
 
-- **Architecture**: 100% client-side with Dexie IndexedDB. Zero backend / database server required, allowing free hosting on GitHub Pages while keeping user data private on their device.
-- **Policy**: No carry forward. Annual leave quotas reset each calendar year; balances are calculated within the selected target year.
-- **Balance Logic**: `Available` quota reflects `totalQuota - approvedDays - pendingDays` to prevent employees from exceeding quota while pending applications are under review.
-- **StrictMode Resilience**: Used explicit deduplication (by code/fingerprint) in data loaders and memoized component lists to prevent React 18/19 StrictMode double-execution artifacts.
-- **Styling**: Vanilla CSS custom properties without Tailwind per project guidelines.
+- **No carry-forward**: সব leave type (CL/SL/AL/CO) December 31-এ expire
+- **Expiry warning trigger**: remaining > 0 AND দিন < 90 — current year only
+- **Warning placement**: BalanceCards-এ amber/red inline badge
+- **Charts**: pure SVG — no Recharts or any external lib
+- **Balance rule**: Pending + Approved উভয়ই deduct, Rejected skip
 
 ## Problems solved
 
-- **Duplicate category buttons ("showing twice")**: React StrictMode double mount caused concurrent seed checks to insert duplicate leave types. Resolved with set-based deduplication and unique leave type memoization.
-- **Wrong balance calculation ("wrong calc")**:
-  - Screenshot showed `Total Allocated: 20 days • Taken: 5 • Pending: 38 • Available: 15`.
-  - Root cause: Duplicate leave types in user's browser IndexedDB, duplicate demo seeds doubling totals, string concatenation in reduce (`"3" + "5"`), and pending days not deducted from available days.
-  - Resolved: Added deduplication in `calculateBalances`, strict `Number()` casting across all components, and subtracted pending days from available balance.
-- **Full Code Review (`/reviews`) remediations**:
-  - Guarded `seedDemoLeavesIfEmpty` against crashes if types array is empty.
-  - Fixed stale quota state in `SettingsModal.tsx` using `useEffect` prop syncing.
-  - Wrapped quota updates and database reset in transactions and `try/catch` with toast alerts.
-  - Reset form fields in `ApplyLeaveModal` on modal close.
-  - Updated email generator return date calculation to skip public holidays in addition to weekends.
-  - Replaced hardcoded toast colors with CSS custom property variables.
+- Build error থেকে বাঁচতে সব JSX closing bracket সাবধানে করা হয়েছে
+- `BalanceCards` এর নতুন `selectedYear` prop backward-compat ছিল না — page.tsx-এ pass করে ঠিক করা
 
 ## Current state
 
-- **Build**: Passes cleanly (`npm run build` completes with exit code 0).
-- **Git**: All changes committed and pushed to `main` branch (`https://github.com/sojibrd/leave_management.git`).
-- **Production Status**: Production-ready and verified.
+- ✅ `npm.cmd run build` exit code 0 — clean build
+- ✅ `npm run dev` চলছে localhost:3000
+- ✅ 5টি tab: Dashboard, Calendar, History, **Analytics**, Expert Guide
+- ✅ Expiry warning: Dec 31-এর 90 দিন আগে থেকে badge দেখাবে
+- কোনো known bug নেই
 
 ## Next session starts with
 
-- Verify live GitHub Pages deployment at `https://sojibrd.github.io/leave_management/` once GitHub Actions run completes.
-- Test workflow in production browser environment (clear old IndexedDB data if testing with an existing browser session).
-- Review any additional requested features or enhancements.
+কোনো pending কাজ নেই। পরবর্তী feature ডেভেলপারের নতুন request অনুযায়ী শুরু হবে।
+`git commit && git push` করা হয়নি এই সেশনে — পরের সেশনে করতে হবে।
 
 ## Open questions
 
-- None. All reported bugs and review issues are resolved.
+- কোনো অমীমাংসিত বিষয় নেই।
+- ভবিষ্যতে বিবেচনা করা যেতে পারে: leave approval email notification, year-over-year analytics comparison

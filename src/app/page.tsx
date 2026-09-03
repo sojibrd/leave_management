@@ -22,7 +22,8 @@ import { EmailDraftModal } from '../components/EmailDraftModal';
 import { PrintableLeaveForm } from '../components/PrintableLeaveForm';
 import { SettingsModal } from '../components/SettingsModal';
 import { ExpertGuideView } from '../components/ExpertGuideView';
-import { CheckCircle, AlertTriangle, Info, CalendarDays, History, Sliders, Compass } from 'lucide-react';
+import { AnalyticsView } from '../components/AnalyticsView';
+import { CheckCircle, AlertTriangle, Info, CalendarDays, History, Sliders, Compass, BarChart2 } from 'lucide-react';
 
 export default function LeaveManagementDashboard() {
   const [mounted, setMounted] = useState(false);
@@ -31,7 +32,7 @@ export default function LeaveManagementDashboard() {
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'calendar' | 'history' | 'guide'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'calendar' | 'history' | 'analytics' | 'guide'>('dashboard');
 
   // Modals state
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -376,6 +377,14 @@ export default function LeaveManagementDashboard() {
           <span>Application History ({leaves.filter((l) => new Date(l.startDate).getFullYear() === selectedYear).length})</span>
         </button>
         <button
+          id="tab-analytics"
+          onClick={() => setActiveTab('analytics')}
+          className={`btn ${activeTab === 'analytics' ? 'btn-primary' : 'btn-outline'}`}
+        >
+          <BarChart2 size={16} />
+          <span>Analytics</span>
+        </button>
+        <button
           id="tab-expert-guide"
           onClick={() => setActiveTab('guide')}
           className={`btn ${activeTab === 'guide' ? 'btn-primary' : 'btn-outline'}`}
@@ -392,6 +401,7 @@ export default function LeaveManagementDashboard() {
             balances={balances}
             onApplyForType={handleApplyForType}
             onOpenNewLeaveModal={handleOpenNewLeaveModal}
+            selectedYear={selectedYear}
           />
           <div style={{
             display: 'grid',
@@ -436,7 +446,17 @@ export default function LeaveManagementDashboard() {
         />
       )}
 
-      {/* TAB 4: Expert Guide & Playbook */}
+      {/* TAB 4: Analytics */}
+      {activeTab === 'analytics' && (
+        <AnalyticsView
+          leaves={leaves}
+          leaveTypes={leaveTypes}
+          balances={balances}
+          selectedYear={selectedYear}
+        />
+      )}
+
+      {/* TAB 5: Expert Guide & Playbook */}
       {activeTab === 'guide' && (
         <ExpertGuideView
           onApplyForBridge={handleApplyForBridge}

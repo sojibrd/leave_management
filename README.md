@@ -37,7 +37,7 @@ A modern, offline-first personal leave management web application designed for e
    Thank you very much for your understanding and support.
 
    Sincerely,
-   Mohammad Sojib
+   Sojib Das 
    Software Engineer
    Employee ID: EMP-1042
    Product & Engineering

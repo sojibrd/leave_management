@@ -1,20 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LeaveBalanceSummary, LeaveType } from '../types/leave';
-import { PlusCircle, Clock, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { PlusCircle, Clock, CheckCircle2, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { calculateExpiryWarnings } from '../lib/calculator';
 
 interface BalanceCardsProps {
   balances: LeaveBalanceSummary[];
   onApplyForType: (leaveType: LeaveType) => void;
   onOpenNewLeaveModal: () => void;
+  selectedYear: number;
 }
 
 export const BalanceCards: React.FC<BalanceCardsProps> = ({
   balances,
   onApplyForType,
-  onOpenNewLeaveModal
+  onOpenNewLeaveModal,
+  selectedYear
 }) => {
+  const expiryWarnings = useMemo(
+    () => calculateExpiryWarnings(balances, selectedYear),
+    [balances, selectedYear]
+  );
+
+  const warningMap = useMemo(() => {
+    const map = new Map<string, (typeof expiryWarnings)[0]>();
+    for (const w of expiryWarnings) map.set(w.leaveTypeCode, w);
+    return map;
+  }, [expiryWarnings]);
   // Calculate aggregate totals
   const totalAllocated = balances.reduce((acc, b) => acc + Number(b.totalQuota || 0), 0);
   const totalApproved = balances.reduce((acc, b) => acc + Number(b.approvedDays || 0), 0);
@@ -169,6 +182,41 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
                     Pending: <strong>{pendingDays}d</strong>
                   </span>
                 </div>
+
+              {/* Quota Expiry Warning Badge */}
+              {(() => {
+                const warn = warningMap.get(leaveType.code);
+                if (!warn) return null;
+                const bgColor = warn.urgencyLevel === 'critical'
+                  ? 'rgba(239,68,68,0.12)'
+                  : warn.urgencyLevel === 'warning'
+                  ? 'rgba(245,158,11,0.12)'
+                  : 'rgba(99,102,241,0.12)';
+                const color = warn.urgencyLevel === 'critical'
+                  ? 'var(--accent-rose)'
+                  : warn.urgencyLevel === 'warning'
+                  ? 'var(--accent-amber)'
+                  : 'var(--primary)';
+                return (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    backgroundColor: bgColor,
+                    border: `1px solid ${color}`,
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.3rem 0.6rem',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    color,
+                    marginBottom: '0.75rem',
+                    animation: warn.urgencyLevel === 'critical' ? 'pulse 2s ease-in-out infinite' : undefined
+                  }}>
+                    <AlertTriangle size={11} />
+                    <span>{warn.remainingDays}d expire হবে — {warn.daysUntilExpiry} দিন বাকি (Dec 31)</span>
+                  </div>
+                );
+              })()}
               </div>
 
               {/* Action Button */}

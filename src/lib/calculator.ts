@@ -520,3 +520,63 @@ export function findOptimalHolidayBridges(
 
   return selected;
 }
+
+export interface ExpiryWarning {
+  leaveTypeCode: string;
+  leaveTypeName: string;
+  leaveTypeColor: string;
+  remainingDays: number;
+  daysUntilExpiry: number;
+  expiryDate: string; // YYYY-MM-DD (Dec 31 of targetYear)
+  urgencyLevel: 'critical' | 'warning' | 'info'; // <30d, 30-60d, 60-90d
+}
+
+/**
+ * Calculates quota expiry warnings for leave types with remaining balance.
+ * Shows warnings only when: remaining balance > 0 AND year-end is within 90 days.
+ * All leave types expire on December 31 (no carry-forward policy).
+ */
+export function calculateExpiryWarnings(
+  balances: LeaveBalanceSummary[],
+  targetYear: number
+): ExpiryWarning[] {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+
+  // Only show warnings for the current year
+  if (targetYear !== currentYear) return [];
+
+  const yearEnd = new Date(targetYear, 11, 31); // Dec 31
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const daysUntilExpiry = Math.ceil((yearEnd.getTime() - today.getTime()) / msPerDay);
+
+  // Only warn if within 90 days of year-end
+  if (daysUntilExpiry > 90) return [];
+
+  const warnings: ExpiryWarning[] = [];
+
+  for (const balance of balances) {
+    if (balance.remainingDays <= 0) continue;
+
+    let urgencyLevel: ExpiryWarning['urgencyLevel'];
+    if (daysUntilExpiry <= 30) {
+      urgencyLevel = 'critical';
+    } else if (daysUntilExpiry <= 60) {
+      urgencyLevel = 'warning';
+    } else {
+      urgencyLevel = 'info';
+    }
+
+    warnings.push({
+      leaveTypeCode: balance.leaveType.code,
+      leaveTypeName: balance.leaveType.name,
+      leaveTypeColor: balance.leaveType.color,
+      remainingDays: balance.remainingDays,
+      daysUntilExpiry,
+      expiryDate: `${targetYear}-12-31`,
+      urgencyLevel
+    });
+  }
+
+  return warnings;
+}

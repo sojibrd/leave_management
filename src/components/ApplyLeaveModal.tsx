@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LeaveAttachment, LeaveBalanceSummary, LeaveRequest, LeaveType, UserSettings } from '../types/leave';
 import { calculateWorkingDays, checkLeaveOverlap, formatFriendlyDate, splitCrossYearLeave, toDateString } from '../lib/calculator';
-import { X, Calendar, AlertCircle, AlertTriangle, Info, FileText, Check, Paperclip, Trash2 } from 'lucide-react';
+import { X, Calendar, AlertCircle, AlertTriangle, Info, FileText, Check, Paperclip, Trash2, Lightbulb } from 'lucide-react';
+import { getSuggestionsForType } from '../lib/leaveExamples';
 
 interface ApplyLeaveModalProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
   const [attachments, setAttachments] = useState<LeaveAttachment[]>([]);
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
   // Deduplicate leave types by code to prevent double-render
   const uniqueLeaveTypes = useMemo(() => {
@@ -56,6 +58,17 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
     }
     return Array.from(map.values());
   }, [leaveTypes]);
+
+  // Suggestions for the selected leave type
+  const currentTypeCode = useMemo(() => {
+    const t = uniqueLeaveTypes.find((lt) => lt.id === selectedTypeId);
+    return t?.code ?? '';
+  }, [uniqueLeaveTypes, selectedTypeId]);
+
+  const suggestions = useMemo(
+    () => getSuggestionsForType(currentTypeCode),
+    [currentTypeCode]
+  );
 
   // Set default selected type
   useEffect(() => {
@@ -543,6 +556,75 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
               onChange={(e) => setReason(e.target.value)}
               required
             />
+
+            {/* Suggestions Toggle */}
+            {suggestions.length > 0 && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowSuggestions((v) => !v)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.775rem',
+                    fontWeight: 600,
+                    color: showSuggestions ? 'var(--primary)' : 'var(--text-muted)',
+                    padding: '0.2rem 0',
+                    transition: 'color 0.15s'
+                  }}
+                >
+                  <Lightbulb size={13} />
+                  {showSuggestions ? 'Hide examples' : `See ${suggestions.length} real examples for ${currentTypeCode}`}
+                </button>
+
+                {/* Chips Grid */}
+                {showSuggestions && (
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.4rem',
+                    marginTop: '0.5rem',
+                    padding: '0.75rem',
+                    backgroundColor: 'var(--bg-surface-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)'
+                  }}>
+                    {suggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          setReason(s);
+                          setShowSuggestions(false);
+                        }}
+                        title={s}
+                        style={{
+                          background: reason === s ? 'var(--primary-subtle)' : 'var(--bg-surface)',
+                          border: `1px solid ${reason === s ? 'var(--primary)' : 'var(--border-subtle)'}`,
+                          borderRadius: 'var(--radius-full)',
+                          padding: '0.3rem 0.65rem',
+                          fontSize: '0.72rem',
+                          fontWeight: 500,
+                          color: reason === s ? 'var(--primary)' : 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          lineHeight: 1.35,
+                          maxWidth: '100%',
+                          transition: 'all 0.15s',
+                          whiteSpace: 'normal'
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Handover / Backup Colleague */}

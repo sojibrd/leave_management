@@ -23,9 +23,8 @@ export function generateLeaveEmailDraft(
   const cc = settings.hrEmail || '';
 
   const backupText = leave.backupPerson
-    ? `During my absence, my colleague ${leave.backupPerson}${
-        leave.backupContact ? ` (Contact: ${leave.backupContact})` : ''
-      } has kindly agreed to handle any urgent deliverables or handovers.`
+    ? `During my absence, my colleague ${leave.backupPerson}${leave.backupContact ? ` (Contact: ${leave.backupContact})` : ''
+    } has kindly agreed to handle any urgent deliverables or handovers.`
     : `I have ensured all my pending deliverables are updated and prioritized ahead of my leave.`;
 
   const managerTitle = settings.managerName?.trim() || 'Mr. Adnan';
@@ -53,8 +52,6 @@ Thank you very much for your understanding and support.
 Sincerely,
 ${settings.employeeName}
 ${settings.designation}
-Employee ID: ${settings.employeeId}
-${settings.department}
 ${settings.companyName}`;
 
   // Construct mailto link

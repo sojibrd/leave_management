@@ -85,9 +85,9 @@ export const PrintableLeaveForm: React.FC<PrintableLeaveFormProps> = ({
               <div>
                 <strong style={{ color: '#475569' }}>Name:</strong> {settings.employeeName}
               </div>
-              <div>
+              {/* <div>
                 <strong style={{ color: '#475569' }}>Employee ID:</strong> {settings.employeeId}
-              </div>
+              </div> */}
               <div>
                 <strong style={{ color: '#475569' }}>Designation:</strong> {settings.designation}
               </div>
