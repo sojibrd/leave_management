@@ -160,7 +160,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
         endDate: isHalfDay ? startDate : endDate,
         isHalfDay,
         halfDayPeriod: isHalfDay ? halfDayPeriod : undefined,
-        totalDays: calculation.workingDays,
+        totalDays: Number(calculation.workingDays),
         reason: reason.trim(),
         backupPerson: backupPerson.trim() || undefined,
         backupContact: backupContact.trim() || undefined,

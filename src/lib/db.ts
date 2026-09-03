@@ -106,7 +106,7 @@ export async function initializeDatabase(): Promise<void> {
     await db.leaveTypes.bulkDelete(duplicateIds);
   }
 
-  // Seed missing leave types
+  // Ensure all 4 default leave types exist without duplicates
   for (const lt of DEFAULT_LEAVE_TYPES) {
     if (!seenCodes.has(lt.code)) {
       const exists = await db.leaveTypes.where('code').equals(lt.code).first();
@@ -115,6 +115,22 @@ export async function initializeDatabase(): Promise<void> {
         seenCodes.add(lt.code);
       }
     }
+  }
+
+  // Cleanup duplicate leaves in db.leaves if any
+  const allLeaves = await db.leaves.toArray();
+  const seenLeaves = new Set<string>();
+  const duplicateLeaveIds: number[] = [];
+  for (const l of allLeaves) {
+    const key = `${l.leaveTypeCode}-${l.startDate}-${l.endDate}-${l.totalDays}-${l.status}-${l.reason?.trim()}`;
+    if (seenLeaves.has(key)) {
+      if (l.id) duplicateLeaveIds.push(l.id);
+    } else {
+      seenLeaves.add(key);
+    }
+  }
+  if (duplicateLeaveIds.length > 0) {
+    await db.leaves.bulkDelete(duplicateLeaveIds);
   }
 
   const existingSettings = await db.settingsTable.get('user_settings');

@@ -120,10 +120,31 @@ export function calculateBalances(
   leaves: LeaveRequest[],
   targetYear: number
 ): LeaveBalanceSummary[] {
-  return leaveTypes.map((type) => {
+  // Deduplicate leave types by code
+  const uniqueTypesMap = new Map<string, LeaveType>();
+  for (const lt of leaveTypes) {
+    if (lt && lt.code && !uniqueTypesMap.has(lt.code)) {
+      uniqueTypesMap.set(lt.code, lt);
+    }
+  }
+  const uniqueLeaveTypes = Array.from(uniqueTypesMap.values());
+
+  // Deduplicate leaves by id to avoid double counting
+  const uniqueLeavesMap = new Map<number | string, LeaveRequest>();
+  for (const l of leaves) {
+    const key = l.id ? l.id : `${l.leaveTypeCode}-${l.startDate}-${l.endDate}-${l.appliedAt}`;
+    if (!uniqueLeavesMap.has(key)) {
+      uniqueLeavesMap.set(key, l);
+    }
+  }
+  const uniqueLeaves = Array.from(uniqueLeavesMap.values());
+
+  return uniqueLeaveTypes.map((type) => {
     // Filter leaves for this leave type in the target year
-    const typeLeaves = leaves.filter((leave) => {
-      if (leave.leaveTypeId !== type.id && leave.leaveTypeCode !== type.code) {
+    const typeLeaves = uniqueLeaves.filter((leave) => {
+      const matchesCode = leave.leaveTypeCode === type.code;
+      const matchesId = leave.leaveTypeId === type.id;
+      if (!matchesCode && !matchesId) {
         return false;
       }
       const leaveYear = parseDate(leave.startDate).getFullYear();
@@ -132,15 +153,16 @@ export function calculateBalances(
 
     const approvedDays = typeLeaves
       .filter((l) => l.status === 'approved')
-      .reduce((sum, l) => sum + (l.totalDays || 0), 0);
+      .reduce((sum, l) => sum + (Number(l.totalDays) || 0), 0);
 
     const pendingDays = typeLeaves
       .filter((l) => l.status === 'pending')
-      .reduce((sum, l) => sum + (l.totalDays || 0), 0);
+      .reduce((sum, l) => sum + (Number(l.totalDays) || 0), 0);
 
-    const remainingDays = Math.max(0, type.totalQuota - approvedDays);
+    // Remaining available quota = total quota - approved days - pending days
+    const remainingDays = Math.max(0, type.totalQuota - approvedDays - pendingDays);
     const percentageUsed = type.totalQuota > 0
-      ? Math.min(100, Math.round((approvedDays / type.totalQuota) * 100))
+      ? Math.min(100, Math.round(((approvedDays + pendingDays) / type.totalQuota) * 100))
       : 0;
 
     return {

@@ -16,10 +16,10 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
   onOpenNewLeaveModal
 }) => {
   // Calculate aggregate totals
-  const totalAllocated = balances.reduce((acc, b) => acc + b.totalQuota, 0);
-  const totalApproved = balances.reduce((acc, b) => acc + b.approvedDays, 0);
-  const totalPending = balances.reduce((acc, b) => acc + b.pendingDays, 0);
-  const totalRemaining = balances.reduce((acc, b) => acc + b.remainingDays, 0);
+  const totalAllocated = balances.reduce((acc, b) => acc + Number(b.totalQuota || 0), 0);
+  const totalApproved = balances.reduce((acc, b) => acc + Number(b.approvedDays || 0), 0);
+  const totalPending = balances.reduce((acc, b) => acc + Number(b.pendingDays || 0), 0);
+  const totalRemaining = balances.reduce((acc, b) => acc + Number(b.remainingDays || 0), 0);
 
   return (
     <div style={{ marginBottom: '2rem' }}>
