@@ -62,7 +62,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   weekendDays: [5, 6], // Friday & Saturday
   currentYear: new Date().getFullYear(),
   customHolidays: DEFAULT_HOLIDAYS_2026,
-  theme: 'dark'
+  theme: 'control-room'
 };
 
 // Define Dexie Database

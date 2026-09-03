@@ -27,7 +27,7 @@ import { CheckCircle, AlertTriangle, Info, CalendarDays, History, Sliders, Compa
 
 export default function LeaveManagementDashboard() {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'control-room' | 'light'>('control-room');
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
@@ -57,7 +57,7 @@ export default function LeaveManagementDashboard() {
 
   // Sync theme
   const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    const nextTheme = theme === 'control-room' ? 'light' : 'control-room';
     setTheme(nextTheme);
     document.documentElement.setAttribute('data-theme', nextTheme);
     localStorage.setItem('leave_master_theme', nextTheme);
@@ -144,7 +144,7 @@ export default function LeaveManagementDashboard() {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = (localStorage.getItem('leave_master_theme') as 'light' | 'dark') || 'dark';
+    const savedTheme = (localStorage.getItem('leave_master_theme') as 'control-room' | 'light') || 'control-room';
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
     loadData();

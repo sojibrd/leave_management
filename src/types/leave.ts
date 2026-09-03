@@ -61,7 +61,7 @@ export interface UserSettings {
   weekendDays: number[]; // 0: Sunday, 1: Monday, ... 5: Friday, 6: Saturday
   currentYear: number;
   customHolidays: Holiday[];
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light' | 'dark' | 'control-room' | 'system';
 }
 
 export interface LeaveBalanceSummary {

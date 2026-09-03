@@ -11,16 +11,12 @@ Last updated: 2026-09-04 04:58
 - **UI Components**: `Header.tsx`, `BalanceCards.tsx`, `ApplyLeaveModal.tsx`, `LeaveHistoryTable.tsx`, `CalendarView.tsx`, `SettingsModal.tsx`, `NotificationToast.tsx`
 - **Expert Guide Tab** (`ExpertGuideView.tsx`): Holiday Hacks (dynamic, upcoming-only), Edge Case Matrix, Handover Checklist, OOO Templates
 
-**Full Project Mobile Responsive Overhaul (AI):**
-- `src/app/globals.css`: Added `.tabs-scroll-container`, `.responsive-dashboard-grid`, `.responsive-analytics-charts`, `.form-grid-2`, `.desktop-table-view`, `.mobile-cards-view`, `.calendar-cell-pills`, `.calendar-cell-dots`, mobile modal bottom sheets, responsive container padding
-- `src/app/page.tsx`: Scrollable tabs nav on mobile, responsive dashboard grid, responsive toast position
-- `src/components/Header.tsx`: `.hide-on-mobile` text labels for secondary buttons so action bar fits on mobile screens
-- `src/components/BalanceCards.tsx`: `minmax(240px, 1fr)` card grid for mobile devices
-- `src/components/CalendarView.tsx`: Compact mobile cells with color-coded circular dots (approved, pending, holiday) + tap-to-view date info modal
-- `src/components/LeaveHistoryTable.tsx`: Full desktop table on `>=769px`, touch-friendly mobile card view on `<=768px` with quick status and email/print/delete actions
-- `src/components/AnalyticsView.tsx`: Responsive charts grid, 2-column mobile summary metrics
-- `src/components/ExpertGuideView.tsx`: Responsive minmax grids (280px) and wrapped switcher pills
-- Modals (`ApplyLeaveModal`, `SettingsModal`, `EmailDraftModal`, `PrintableLeaveForm`): Stacked form fields with `.form-grid-2`, flex-wrapped action buttons, responsive signature blocks
+**Control-Room Theme Integration (AI):**
+- `src/app/globals.css`: Added deep mission-control palette (`--bg-app: #06090f`, `--bg-surface: #0c121e`, `--primary: #0284c7`, electric cyan `--accent-cyan: #00f0ff`, radar green `--accent-emerald: #10b981`), micro-grid background pattern (`radial-gradient`), HUD-like glow, updated gradient text to electric cyan/blue, updated primary buttons
+- `src/app/layout.tsx`: Default `data-theme="control-room"`
+- `src/app/page.tsx`: Integrated `'control-room'` theme state and toggle logic
+- `src/components/Header.tsx`: Control Room badge, updated theme toggle button with cyan sun icon
+- `src/types/leave.ts` & `src/lib/db.ts`: Added `'control-room'` to theme types and default settings
 
 ## Decisions made
 
@@ -34,13 +30,15 @@ Last updated: 2026-09-04 04:58
 - **Mobile Navigation**: Horizontal scrollable tab bar with touch momentum
 - **Mobile History Table**: Native card view on `<=768px` instead of awkward 6-column horizontal scroll
 - **Mobile Calendar**: Dot indicators for leaves & holidays on `<=768px` with tap popover
+- **Default Theme**: Control Room (deep aerospace dark with subtle micro-grid and electric cyan accents)
 
 ## Current state
 
 - ✅ `npm run dev` চলছে localhost:3000
 - ✅ Production build verified: `npm run build` exited with code 0
 - ✅ Full mobile responsive layout across all 5 tabs and 4 modal dialogs
-- ⚠️ `git commit && git push` করা বাকি
+- ✅ Control-Room theme applied as primary theme
+
 
 ## Next session starts with
 

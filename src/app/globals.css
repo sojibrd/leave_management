@@ -53,47 +53,61 @@
   --toast-info-icon: #60a5fa;
 }
 
+[data-theme="control-room"],
 [data-theme="dark"] {
-  --bg-app: #090d16;
-  --bg-surface: #111827;
-  --bg-surface-elevated: #1a2234;
-  --bg-surface-glass: rgba(17, 24, 39, 0.75);
-  --bg-surface-subtle: #1e293b;
-  --bg-input: #151d2e;
+  /* Control Room Deep Aerospace Base */
+  --bg-app: #06090f;
+  --bg-surface: #0c121e;
+  --bg-surface-elevated: #111a2c;
+  --bg-surface-glass: rgba(12, 18, 30, 0.85);
+  --bg-surface-subtle: #162238;
+  --bg-input: #090e18;
 
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --text-inverse: #0f172a;
+  --text-primary: #e6edf3;
+  --text-secondary: #94a3b8;
+  --text-muted: #5a6e85;
+  --text-inverse: #06090f;
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: #818cf8;
+  /* Instrument Borders with Subtle Cyan Hue */
+  --border-subtle: rgba(56, 189, 248, 0.14);
+  --border-strong: rgba(56, 189, 248, 0.28);
+  --border-focus: #00f0ff;
 
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-glow: rgba(99, 102, 241, 0.35);
-  --primary-subtle: rgba(99, 102, 241, 0.15);
+  /* Command Telemetry Primary */
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-glow: rgba(14, 165, 233, 0.35);
+  --primary-subtle: rgba(14, 165, 233, 0.15);
 
-  --accent-cyan: #22d3ee;
-  --accent-emerald: #34d399;
-  --accent-amber: #fbbf24;
-  --accent-rose: #fb7185;
-  --accent-purple: #a78bfa;
+  /* Tactical Functional Status Accents */
+  --accent-cyan: #00f0ff;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --accent-purple: #8b5cf6;
 
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.6), 0 6px 8px -4px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 24px 32px -6px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 35px rgba(99, 102, 241, 0.45);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.55);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.65), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.75), 0 6px 12px -4px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 24px 36px -6px rgba(0, 0, 0, 0.85);
+  --shadow-glow: 0 0 28px rgba(14, 165, 233, 0.4);
 
-  /* Toast semantic colors - dark mode */
+  /* Toast semantic colors - control room */
   --toast-success-bg: #064e3b;
   --toast-success-icon: #34d399;
   --toast-error-bg: #881337;
   --toast-error-icon: #fca5a5;
-  --toast-info-bg: #0f172a;
-  --toast-info-icon: #93c5fd;
+  --toast-info-bg: #0b1528;
+  --toast-info-icon: #38bdf8;
+}
+
+[data-theme="control-room"] body,
+[data-theme="dark"] body {
+  background-color: var(--bg-app);
+  background-image: 
+    radial-gradient(ellipse at 50% -10%, rgba(14, 165, 233, 0.12) 0%, transparent 60%),
+    radial-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px;
 }
 
 * {
@@ -161,7 +175,7 @@ html, body {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #00f0ff 50%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -189,14 +203,16 @@ html, body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #0369a1 100%);
   color: #ffffff;
-  box-shadow: 0 4px 12px var(--primary-glow);
+  box-shadow: 0 4px 14px var(--primary-glow);
+  border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-hover) 0%, #6d28d9 100%);
-  box-shadow: 0 6px 18px var(--primary-glow);
+  background: linear-gradient(135deg, var(--primary-hover) 0%, #075985 100%);
+  box-shadow: 0 6px 20px var(--primary-glow);
+  border-color: rgba(56, 189, 248, 0.45);
 }
 
 .btn-secondary {

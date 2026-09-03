@@ -6,7 +6,7 @@ import { Calendar, Download, Upload, Moon, Sun, Settings, UserCheck, Compass } f
 
 interface HeaderProps {
   settings: UserSettings;
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'control-room';
   onToggleTheme: () => void;
   onOpenSettings: () => void;
   onExportData: () => void;
@@ -52,12 +52,13 @@ export const Header: React.FC<HeaderProps> = ({
           width: '46px',
           height: '46px',
           borderRadius: 'var(--radius-md)',
-          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+          background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: '#ffffff',
-          boxShadow: 'var(--shadow-md)'
+          boxShadow: '0 0 15px rgba(14, 165, 233, 0.3)',
+          border: '1px solid rgba(56, 189, 248, 0.25)'
         }}>
           <Calendar size={24} />
         </div>
@@ -66,8 +67,8 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
               Leave<span className="gradient-text">Master</span>
             </h1>
-            <span className="badge badge-weekend" style={{ fontSize: '0.7rem' }}>
-              Employee Portal
+            <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: 'rgba(14, 165, 233, 0.12)', color: 'var(--accent-cyan)', border: '1px solid rgba(14, 165, 233, 0.28)' }}>
+              Control Room
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
@@ -172,9 +173,9 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onToggleTheme}
           className="btn btn-secondary btn-icon-only"
           aria-label="Toggle theme"
-          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          title={theme === 'control-room' || theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Control Room Mode'}
         >
-          {theme === 'dark' ? <Sun size={17} color="#fbbf24" /> : <Moon size={17} color="#6366f1" />}
+          {theme === 'control-room' || theme === 'dark' ? <Sun size={17} color="#00f0ff" /> : <Moon size={17} color="#0284c7" />}
         </button>
       </div>
     </header>
