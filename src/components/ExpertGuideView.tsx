@@ -35,132 +35,132 @@ export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({ onApplyForBrid
   const holidayHacks = [
     {
       id: 'mar-sprint',
-      title: 'Independence Day Ultra-Sprint (March 2026)',
-      tag: '🔥 5 Days Leave = 11 Days Off',
+      title: 'স্বাধীনতা দিবস আল্ট্রা-স্প্রিন্ট (মার্চ ২০২৬)',
+      tag: '🔥 ৫ দিন ছুটি = ১১ দিন ভ্যাকেশন',
       badgeColor: 'var(--accent-rose)',
       startDate: '2026-03-29',
       endDate: '2026-04-02',
-      reason: 'Spring family vacation and recovery sprint',
+      reason: 'স্বাধীনতা দিবস সংলগ্ন পারিবারিক অবকাশ ও রিচার্জ স্প্রিন্ট',
       breakdown: [
-        { date: 'Thu, 26 Mar', label: 'Independence Day (Holiday)', type: 'holiday' },
-        { date: 'Fri-Sat, 27-28 Mar', label: 'Weekend Off', type: 'weekend' },
-        { date: 'Sun-Thu, 29 Mar - 02 Apr', label: 'Take 5 Annual Leaves', type: 'leave' },
-        { date: 'Fri-Sat, 03-04 Apr', label: 'Weekend Off', type: 'weekend' }
+        { date: '২৬ মার্চ (বৃহস্পতি)', label: 'স্বাধীনতা দিবস (সরকারি ছুটি)', type: 'holiday' },
+        { date: '২৭-২৮ মার্চ (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' },
+        { date: '২৯ মার্চ - ০২ এপ্রিল (রবি-বৃহস্পতি)', label: '৫ দিন Annual Leave নিন', type: 'leave' },
+        { date: '০৩-০৪ এপ্রিল (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' }
       ],
-      description: 'By bridging Independence Day and two consecutive weekends with 5 days of Annual Leave, you get an uninterrupted 11-day mega break.'
+      description: 'স্বাধীনতা দিবস ও দুই সপ্তাহের উইকেন্ডের সাথে মাত্র ৫ দিনের বাৎসরিক ছুটি ব্রিজিং করে টানা ১১ দিনের নিরবচ্ছিন্ন ছুটি উপভোগ করুন।'
     },
     {
       id: 'eid-bridge',
-      title: 'Eid-ul-Fitr Golden Bridge (March 2026)',
-      tag: '⚡ 2 Days Leave = 8 Days Off',
+      title: 'ঈদুল ফিতর গোল্ডেন ব্রিজ (মার্চ ২০২৬)',
+      tag: '⚡ ২ দিন ছুটি = ৮ দিন ভ্যাকেশন',
       badgeColor: 'var(--accent-amber)',
       startDate: '2026-03-22',
       endDate: '2026-03-23',
-      reason: 'Eid celebrations with extended family',
+      reason: 'ঈদের উদযাপন ও পরিবারের সাথে সময় কাটানো',
       breakdown: [
-        { date: 'Fri-Sat, 20-21 Mar', label: 'Weekend Off', type: 'weekend' },
-        { date: 'Sun-Mon, 22-23 Mar', label: 'Take 2 Annual/Casual Leaves', type: 'leave' },
-        { date: 'Tue-Thu, 24-26 Mar', label: 'Eid & Independence Holidays', type: 'holiday' },
-        { date: 'Fri-Sat, 27-28 Mar', label: 'Weekend Off', type: 'weekend' }
+        { date: '২০-২১ মার্চ (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' },
+        { date: '২২-২৩ মার্চ (রবি-সোম)', label: '২ দিন Annual/Casual Leave নিন', type: 'leave' },
+        { date: '২৪-২৬ মার্চ (মঙ্গল-বৃহস্পতি)', label: 'ঈদ ও স্বাধীনতা দিবসের সরকারি ছুটি', type: 'holiday' },
+        { date: '২৭-২৮ মার্চ (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' }
       ],
-      description: 'Taking just 2 bridge days adjacent to Eid holidays grants you an expansive 8 to 9 days to travel without peak rush.'
+      description: 'ঈদের সরকারি ছুটির আগে মাত্র ২ দিনের ব্রিজ লিভ নিয়ে যাতায়াতের প্রচণ্ড ভিড় এড়িয়ে টানা ৮ দিনের স্বস্তিদায়ক ছুটি পান।'
     },
     {
       id: 'dec-sprint',
-      title: 'Victory Day & Year-End Recharge (December 2026)',
-      tag: '❄️ 3 Days Leave = 7 Days Off',
+      title: 'বিজয় দিবস ও ইয়ার-এন্ড রিচার্জ (ডিসেম্বর ২০২৬)',
+      tag: '❄️ ৩ দিন ছুটি = ৭ দিন অফ',
       badgeColor: 'var(--primary)',
       startDate: '2026-12-13',
       endDate: '2026-12-15',
-      reason: 'Year-end personal recharge and travel',
+      reason: 'বাৎসরিক কাজের ক্লান্তি দূর করতে ইয়ার-এন্ড ট্রাভেল',
       breakdown: [
-        { date: 'Fri-Sat, 11-12 Dec', label: 'Weekend Off', type: 'weekend' },
-        { date: 'Sun-Tue, 13-15 Dec', label: 'Take 3 Annual Leaves', type: 'leave' },
-        { date: 'Wed, 16 Dec', label: 'Victory Day (Holiday)', type: 'holiday' }
+        { date: '১১-১২ ডিসেম্বর (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' },
+        { date: '১৩-১৫ ডিসেম্বর (রবি-মঙ্গল)', label: '৩ দিন Annual Leave নিন', type: 'leave' },
+        { date: '১৬ ডিসেম্বর (বুধ)', label: 'বিজয় দিবস (সরকারি ছুটি)', type: 'holiday' }
       ],
-      description: 'Combine Victory Day with 3 days of leave to recharge your mental battery before closing annual objectives.'
+      description: 'বিজয় দিবসের সাথে ৩ দিনের ছুটি মিলিয়ে বাৎসরিক লক্ষ্যমাত্রা সমাপ্তির আগে নিজের মানসিক শক্তি রিচার্জ করে নিন।'
     }
   ];
 
   const edgeCases = [
     {
       icon: <Layers size={20} color="var(--accent-rose)" />,
-      title: '1. Date Collisions & Overlapping Applications',
-      rule: 'Total leave on any calendar date cannot exceed 1.0 day.',
-      details: 'The system strictly blocks overlapping dates with existing Pending/Approved leaves. However, complementary half-days (e.g. Morning Half + Afternoon Half) on the same date are intelligently allowed.'
+      title: '১. তারিখের সংঘাত ও Overlapping Applications',
+      rule: 'একই ক্যালেন্ডার তারিখে মোট ছুটি ১.০ দিনের বেশি হতে পারবে না।',
+      details: 'বিদ্যমান Pending বা Approved ছুটির তারিখের সাথে নতুন আবেদন ওভারল্যাপ করলে সিস্টেম সাথে সাথে ব্লক করে। তবে একই দিনে Morning Half এবং Afternoon Half-এর মতো Complementary Half-Day আবেদন স্বয়ংক্রিয়ভাবে অনুমোদন পায়।'
     },
     {
       icon: <Calendar size={20} color="var(--primary)" />,
-      title: '2. Weekend & Public Holiday Boundary Collision',
-      rule: 'Non-working days are strictly excluded from quota deductions.',
-      details: 'Selecting Thursday to Monday only deducts 2 working days (Thursday & Sunday), safely skipping Friday and Saturday weekends and any intermediate official holidays.'
+      title: '২. উইকেন্ড ও সরকারি ছুটির সীমানা সংঘর্ষ',
+      rule: 'ছুটির দিনগুলো কখনোই কোটা ডেডাকশনে অন্তর্ভুক্ত হয় না।',
+      details: 'বৃহস্পতি থেকে রবিবার আবেদন করলে সিস্টেম শুক্রবার ও শনিবার বাদ দিয়ে কেবল ২ কর্মদিবস (বৃহস্পতি ও রবিবার) হিসাব করে।'
     },
     {
       icon: <Clock size={20} color="var(--accent-amber)" />,
-      title: '3. The Sandwich Rule Matrix',
-      rule: 'Deducting intervening weekends/holidays when taking contiguous leaves.',
-      details: 'In organizations enforcing strict sandwich rules, taking Thursday and Sunday leaves deducts 4 days instead of 2. In this system, standard non-working days remain protected by default.'
+      title: '৩. স্যান্ডউইচ রুল (The Sandwich Rule)',
+      rule: 'টানা ছুটির মাঝখানের উইকেন্ডও ছুটি গণ্য হওয়ার নীতি।',
+      details: 'যেসব প্রতিষ্ঠানে কঠোর Sandwich Rule রয়েছে, সেখানে বৃহস্পতি ও রবিবার ছুটি নিলে মাঝের শুক্র-শনি মিলিয়ে ৪ দিন কর্তন হয়। আমাদের সিস্টেমে উইকেন্ড সবসময় সুরক্ষিত থাকে।'
     },
     {
       icon: <Flame size={20} color="var(--accent-emerald)" />,
-      title: '4. Quota Exhaustion & LOP (Leave Without Pay)',
-      rule: 'Graceful overflow into Unpaid Leave / LOP rather than silent loss.',
-      details: 'When requesting more days than your remaining balance, the system displays an amber LOP warning and flags the exceeded portion for HR processing.'
+      title: '৪. কোটা শেষ ও LOP (Leave Without Pay)',
+      rule: 'কোটা অতিক্রম করলে স্বয়ংক্রিয় সতর্কতা ও অবৈতনিক লিভ হিসেবে রূপান্তর।',
+      details: 'অবশিষ্ট ব্যালেন্সের চেয়ে বেশি দিন আবেদন করলে সিস্টেম অ্যাম্বার সতর্কতা দেখায় এবং অতিরিক্ত দিনগুলো Unpaid Leave হিসেবে এইচআর প্রক্রিয়াকরণের জন্য প্রস্তুত করে।'
     },
     {
       icon: <Sparkles size={20} color="#8b5cf6" />,
-      title: '5. Cross-Year Crossover (Dec 31 - Jan 1)',
-      rule: 'Deterministic multi-year partition.',
-      details: 'Leaves crossing from December into January are split across respective calendar years so quotas deduct from the appropriate annual allowance without carry-forward confusion.'
+      title: '৫. বছর পরিবর্তনের সীমানা (Dec 31 - Jan 1 Crossover)',
+      rule: 'স্বয়ংক্রিয় বাৎসরিক পার্টিশনিং (Year Splitting)।',
+      details: 'ডিসেম্বর থেকে জানুয়ারিতে বিস্তৃত ছুটির আবেদনগুলোকে স্বয়ংক্রিয়ভাবে সংশ্লিষ্ট বছরের কোটায় ভাগ করা হয় যাতে Carry-Forward ছাড়া সঠিক কোটা কর্তন নিশ্চিত হয়।'
     },
     {
       icon: <ShieldCheck size={20} color="#06b6d4" />,
-      title: '6. Atomic Quota Reservation Invariant',
-      rule: 'Available = Quota - Approved - Pending.',
-      details: 'Pending applications instantly reserve days from the available quota, making it mathematically impossible to double-spend leave balances.'
+      title: '৬. অ্যাটমিক কোটা রিজার্ভেশন (Atomic Reservation)',
+      rule: 'Available = Total Quota - Approved - Pending।',
+      details: 'Pending থাকা অবস্থাতেই কোটা রিজার্ভ হয়ে যায়, ফলে একই কোটার বিপরীতে একাধিক সমান্তরাল আবেদন সাবমিট করা অসম্ভব।'
     }
   ];
 
   const oooTemplates = [
     {
       id: 'slack-status',
-      title: 'Internal Slack / Microsoft Teams Status',
-      text: '🌴 OOO: Returning on [Date] | Primary Backup: @[ColleagueName] | Emergency: Call mobile'
+      title: 'অভ্যন্তরীণ স্ল্যাক / মাইক্রোসফট টিমস স্ট্যাটাস',
+      text: '🌴 OOO: Returning on [তারিখ] | Primary Backup: @[সহকর্মীর নাম] | Emergency: Call mobile'
     },
     {
       id: 'client-autoresponder',
-      title: 'External Client Email Auto-Responder',
-      text: `Subject: Out of Office: [Your Name] until [Date]
+      title: 'এক্সটার্নাল ক্লায়েন্টদের জন্য ইমেইল অটো-রেসপন্ডার',
+      text: `Subject: Out of Office: [আপনার নাম] until [ফেরার তারিখ]
 
 Hello,
 
-Thank you for your email. I am currently out of the office on scheduled leave, returning on [Date].
+Thank you for your email. I am currently out of the office on scheduled leave, returning on [ফেরার তারিখ].
 
 During this period, I will have limited/no access to email.
 
 For urgent matters regarding:
-- [Project Name]: Please contact [Backup Name] ([backup@company.com])
+- [প্রোজেক্টের নাম]: Please contact [ব্যাকআপ ব্যক্তির নাম] ([backup@company.com])
 - General / Operational inquiries: Please reach out to [team@company.com]
 
 I will respond to your message promptly upon my return.
 
 Best regards,
-[Your Name]
-[Your Title]`
+[আপনার নাম]
+[আপনার পদবি]`
     },
     {
       id: 'handover-brief',
-      title: 'Internal Handover Briefing to Team',
+      title: 'টিম চ্যানেলে ছুটির হ্যান্ডওভার নোটিশ',
       text: `Hi Team,
 
-I will be on leave from [Start Date] to [End Date], returning to office on [Return Date].
+আমি [শুরুর তারিখ] থেকে [শেষের তারিখ] পর্যন্ত ছুটিতে থাকব এবং [অফিসে ফেরার তারিখ] অফিসে উপস্থিত হব।
 
-Key Project Handover:
-1. [Project A]: All in-flight PRs merged. [Colleague Name] will handle client check-in.
-2. [Project B]: Sprint deliverables completed. Runbook is documented at [Link].
-3. Emergency Escalation: Only contact via phone for P1 critical production issues.
+প্রোজেক্ট হ্যান্ডওভার সামারি:
+১. [প্রোজেক্ট A]: সকল চলমান Pull Request মার্জ করা হয়েছে। ক্লায়েন্ট ফলো-আপের দায়িত্ব [সহকর্মীর নাম]-এর কাছে রয়েছে।
+২. [প্রোজেক্ট B]: বর্তমান স্প্রিন্টের কাজ সম্পন্ন। প্রয়োজনীয় গাইডলাইন [ডকুমেন্ট লিংক]-এ দেওয়া আছে।
+৩. ইমার্জেন্সি যোগাযোগ: কেবল P1 প্রোডাকশন ক্রিটিক্যাল সমস্যা ছাড়া মোবাইলে যোগাযোগ না করার অনুরোধ রইল।
 
-Thank you!`
+ধন্যবাদ!`
     }
   ];
 
@@ -182,14 +182,14 @@ Thank you!`
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <Compass size={22} color="var(--primary)" />
             <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Master Reference & Strategic Handbook
+              মাস্টার রেফারেন্স ও স্ট্র্যাটেজিক প্লেবুক
             </span>
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-            Manage Leaves Like an Expert
+            দক্ষভাবে ছুটি ব্যবস্থাপনা (Manage Leave Like an Expert)
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            Maximize your personal recovery time through intelligent holiday bridging, zero-friction team handovers, and rock-solid system edge-case protection.
+            স্মার্ট হলিডে ব্রিজিং, নিবিড় হ্যান্ডওভার প্রোটোকল এবং শক্তিশালী সিস্টেম এজ-কেস সুরক্ষার মাধ্যমে নিজের জন্য সর্বোচ্চ বিশ্রামের সুযোগ নিশ্চিত করুন।
           </p>
         </div>
 
@@ -209,7 +209,7 @@ Thank you!`
             style={{ border: activeSection === 'hacks' ? undefined : 'none' }}
           >
             <Sparkles size={14} />
-            <span>2026 Holiday Hacks</span>
+            <span>২০২৬ হলিডে হ্যাকস</span>
           </button>
           <button
             onClick={() => setActiveSection('edgecases')}
@@ -217,7 +217,7 @@ Thank you!`
             style={{ border: activeSection === 'edgecases' ? undefined : 'none' }}
           >
             <ShieldCheck size={14} />
-            <span>Edge Case Matrix</span>
+            <span>Edge Case ম্যাট্রিক্স</span>
           </button>
           <button
             onClick={() => setActiveSection('handover')}
@@ -225,7 +225,7 @@ Thank you!`
             style={{ border: activeSection === 'handover' ? undefined : 'none' }}
           >
             <Briefcase size={14} />
-            <span>Handover Checklist</span>
+            <span>হ্যান্ডওভার চেকলিস্ট</span>
           </button>
           <button
             onClick={() => setActiveSection('ooo')}
@@ -233,7 +233,7 @@ Thank you!`
             style={{ border: activeSection === 'ooo' ? undefined : 'none' }}
           >
             <MessageSquare size={14} />
-            <span>OOO Templates</span>
+            <span>OOO টেমপ্লেট</span>
           </button>
         </div>
       </div>
@@ -243,10 +243,10 @@ Thank you!`
         <div>
           <div style={{ marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              Strategic Holiday Bridging (Bangladesh 2026)
+              কৌশলগত ছুটি ব্রিজিং (বাংলাদেশ ২০২৬)
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              Combine public holidays and weekends with minimal annual leaves to unlock long vacation sprints.
+              সরকারি ছুটি ও উইকেন্ডের সাথে মিলিয়ে সামান্য ছুটি খরচ করে দীর্ঘ ভ্যাকেশন আনলক করুন।
             </p>
           </div>
 
@@ -325,7 +325,7 @@ Thank you!`
                     className="btn btn-primary btn-sm"
                     style={{ width: '100%', justifyContent: 'center' }}
                   >
-                    <span>Apply for this Sprint</span>
+                    <span>এই স্প্রিন্টের জন্য আবেদন করুন</span>
                     <ArrowRight size={14} />
                   </button>
                 )}
@@ -340,10 +340,10 @@ Thank you!`
         <div>
           <div style={{ marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              System Edge Case Matrix & Business Rules
+              সিস্টেম Edge Case ম্যাট্রিক্স ও বিজনেস রুলস
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              How our leave engine guarantees mathematical precision, zero duplicate bookings, and data integrity.
+              আমাদের লিভ ক্যালকুলেশন ইঞ্জিন কীভাবে নির্ভুলতা ও ডুপ্লিকেট প্রতিরোধ নিশ্চিত করে।
             </p>
           </div>
 
@@ -385,7 +385,7 @@ Thank you!`
                   borderRadius: 'var(--radius-sm)',
                   color: 'var(--primary)'
                 }}>
-                  Rule: {ec.rule}
+                  রুল: {ec.rule}
                 </div>
 
                 <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -402,10 +402,10 @@ Thank you!`
         <div className="card" style={{ padding: '1.75rem' }}>
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              The Ironclad Handover Checklist
+              নিখুঁত হ্যান্ডওভার চেকলিস্ট (Ironclad Handover)
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              Complete these steps before starting your scheduled leave to ensure zero stress and uninterrupted project velocity.
+              ছুটিতে যাওয়ার পূর্বে এই ধাপগুলো নিশ্চিত করুন যাতে আপনার অনুপস্থিতিতেও কাজ নিরবচ্ছিন্ন থাকে।
             </p>
           </div>
 
@@ -417,20 +417,20 @@ Thank you!`
               border: '1px solid var(--border-subtle)'
             }}>
               <h4 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--accent-emerald)' }}>
-                1. Alignment (3-5 Days Before)
+                ১. প্রস্তুতি ও ব্রিফিং (৩-৫ দিন পূর্বে)
               </h4>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-emerald)" />
-                  <span>Brief designated primary and secondary backup colleagues.</span>
+                  <span>প্রাইমারি ও সেকেন্ডারি ব্যাকআপ সহকর্মীদের সম্পূর্ণ কাজের ব্রিফিং দিন।</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-emerald)" />
-                  <span>Inform sprint lead about capacity reduction.</span>
+                  <span>স্প্রিন্ট লিডকে অনুপস্থিতির কারণে ক্যাপাসিটি রিডাকশন সম্পর্কে জানান।</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-emerald)" />
-                  <span>Reschedule or delegate upcoming calendar meetings.</span>
+                  <span>আসন্ন মিটিংগুলো রিসিডিউল করুন অথবা সহকর্মীদের প্রতিনিধি হিসেবে পাঠান।</span>
                 </li>
               </ul>
             </div>
@@ -442,20 +442,20 @@ Thank you!`
               border: '1px solid var(--border-subtle)'
             }}>
               <h4 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--primary)' }}>
-                2. Execution (1 Day Before)
+                ২. বাস্তবায়ন ও পার্কিং (১ দিন পূর্বে)
               </h4>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--primary)" />
-                  <span>Merge or cleanly park all in-flight PRs / code branches.</span>
+                  <span>চলমান সব Pull Request মার্জ করুন অথবা কোড ক্লিন অবস্থায় পার্ক করুন।</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--primary)" />
-                  <span>Publish written handover notes in Slack channel.</span>
+                  <span>স্ল্যাক বা টিমস চ্যানেলে লিখিত হ্যান্ডওভার নোট পোস্ট করুন।</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--primary)" />
-                  <span>Set up email auto-responder and calendar out-of-office.</span>
+                  <span>ইমেইল অটো-রেসপন্ডার ও ক্যালেন্ডারে Out-of-Office সেট করুন।</span>
                 </li>
               </ul>
             </div>
@@ -467,20 +467,20 @@ Thank you!`
               border: '1px solid var(--border-subtle)'
             }}>
               <h4 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--accent-amber)' }}>
-                3. Boundaries (During Absence)
+                ৩. ছুটির সময়ে সচেতনতা (During Absence)
               </h4>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-amber)" />
-                  <span>Sign out of Slack and email on personal phone.</span>
+                  <span>ব্যক্তিগত ফোন থেকে কাজের স্ল্যাক ও ইমেইল নোটিফিকেশন অফ রাখুন।</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-amber)" />
-                  <span>Strict rule: Mobile phone calls only for P1 outages.</span>
+                  <span>কঠোর নিয়ম: কেবল P1 প্রোডাকশন ডাউন হলে মোবাইলে ফোন করা যাবে।</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-amber)" />
-                  <span>Return refreshed with zero unfinished task debt.</span>
+                  <span>ছুটি শেষে সম্পূর্ণ ফুরফুরে মনে অফিসে ফিরুন।</span>
                 </li>
               </ul>
             </div>
@@ -493,10 +493,10 @@ Thank you!`
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ marginBottom: '0.5rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              Executive Out-Of-Office (OOO) Templates
+              প্রফেশনাল আউট-অফ-অফিস (OOO) টেমপ্লেট
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              Ready-to-use communication templates for Slack, client auto-responders, and internal team memos.
+              স্ল্যাক স্ট্যাটাস, ক্লায়েন্ট অটো-রেসপন্ডার এবং টিম মেমোর জন্য রেডিমেড টেমপ্লেট।
             </p>
           </div>
 
@@ -522,12 +522,12 @@ Thank you!`
                     {copiedId === t.id ? (
                       <>
                         <Check size={14} color="var(--accent-emerald)" />
-                        <span style={{ color: 'var(--accent-emerald)' }}>Copied!</span>
+                        <span style={{ color: 'var(--accent-emerald)' }}>কপি হয়েছে!</span>
                       </>
                     ) : (
                       <>
                         <Copy size={14} />
-                        <span>Copy Template</span>
+                        <span>কপি করুন</span>
                       </>
                     )}
                   </button>
