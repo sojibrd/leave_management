@@ -197,3 +197,105 @@ export function formatFriendlyDateRange(startStr: string, endStr: string): strin
   if (!endStr || startStr === endStr) return formatFriendlyDate(startStr);
   return `${formatFriendlyDate(startStr)} – ${formatFriendlyDate(endStr)}`;
 }
+
+export interface OverlapCheckResult {
+  hasConflict: boolean;
+  conflictReason?: string;
+  conflictingLeave?: LeaveRequest;
+}
+
+/**
+ * Checks whether a proposed leave date range and half-day configuration
+ * collides with any existing Approved or Pending leave requests.
+ */
+export function checkLeaveOverlap(
+  newStartDate: string,
+  newEndDate: string,
+  newIsHalfDay: boolean,
+  newHalfDayPeriod: 'first-half' | 'second-half' = 'first-half',
+  existingLeaves: LeaveRequest[] = [],
+  ignoreLeaveId?: number
+): OverlapCheckResult {
+  if (!newStartDate || !newEndDate) {
+    return { hasConflict: false };
+  }
+
+  const newStart = parseDate(newStartDate).getTime();
+  const newEnd = parseDate(newIsHalfDay ? newStartDate : newEndDate).getTime();
+
+  // Only check leaves that are approved or pending
+  const activeLeaves = existingLeaves.filter(
+    (l) => (l.status === 'approved' || l.status === 'pending') && l.id !== ignoreLeaveId
+  );
+
+  for (const leave of activeLeaves) {
+    const leaveStart = parseDate(leave.startDate).getTime();
+    const leaveEnd = parseDate(leave.isHalfDay ? leave.startDate : leave.endDate).getTime();
+
+    // Check if date intervals overlap: (StartA <= EndB) and (EndA >= StartB)
+    const isDateOverlap = newStart <= leaveEnd && newEnd >= leaveStart;
+
+    if (isDateOverlap) {
+      // Sub-day granularity logic:
+      // If both are single-day half-days on the EXACT same day, they only conflict if they share the same period
+      const isBothSingleDay = newStart === newEnd && leaveStart === leaveEnd;
+      if (isBothSingleDay && newIsHalfDay && leave.isHalfDay) {
+        if (newHalfDayPeriod === leave.halfDayPeriod) {
+          return {
+            hasConflict: true,
+            conflictReason: `You already have a ${leave.status} ${leave.leaveTypeName || leave.leaveTypeCode} (${leave.halfDayPeriod === 'first-half' ? 'First Half / Morning' : 'Second Half / Afternoon'}) on ${formatFriendlyDate(newStartDate)}.`,
+            conflictingLeave: leave
+          };
+        }
+        // Different half of the same day: allowed!
+        continue;
+      }
+
+      // In all other cases where dates overlap, it is a hard collision
+      const formattedRange = formatFriendlyDateRange(leave.startDate, leave.isHalfDay ? leave.startDate : leave.endDate);
+      return {
+        hasConflict: true,
+        conflictReason: `Conflicts with an existing ${leave.status.toUpperCase()} leave (${leave.leaveTypeName || leave.leaveTypeCode}: ${formattedRange}).`,
+        conflictingLeave: leave
+      };
+    }
+  }
+
+  return { hasConflict: false };
+}
+
+export interface YearPartition {
+  year: number;
+  startDate: string;
+  endDate: string;
+}
+
+/**
+ * Splits a leave spanning across year boundaries into separate yearly partitions
+ */
+export function splitCrossYearLeave(startDateStr: string, endDateStr: string): YearPartition[] {
+  if (!startDateStr || !endDateStr) return [];
+  const start = parseDate(startDateStr);
+  const end = parseDate(endDateStr);
+  if (start.getTime() > end.getTime()) return [];
+
+  const startYear = start.getFullYear();
+  const endYear = end.getFullYear();
+
+  if (startYear === endYear) {
+    return [{ year: startYear, startDate: startDateStr, endDate: endDateStr }];
+  }
+
+  const partitions: YearPartition[] = [];
+  for (let y = startYear; y <= endYear; y++) {
+    const partitionStart = y === startYear ? startDateStr : `${y}-01-01`;
+    const partitionEnd = y === endYear ? endDateStr : `${y}-12-31`;
+    partitions.push({
+      year: y,
+      startDate: partitionStart,
+      endDate: partitionEnd
+    });
+  }
+
+  return partitions;
+}

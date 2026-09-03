@@ -21,7 +21,8 @@ import { ApplyLeaveModal } from '../components/ApplyLeaveModal';
 import { EmailDraftModal } from '../components/EmailDraftModal';
 import { PrintableLeaveForm } from '../components/PrintableLeaveForm';
 import { SettingsModal } from '../components/SettingsModal';
-import { CheckCircle, AlertTriangle, Info, CalendarDays, History, Sliders } from 'lucide-react';
+import { ExpertGuideView } from '../components/ExpertGuideView';
+import { CheckCircle, AlertTriangle, Info, CalendarDays, History, Sliders, Compass } from 'lucide-react';
 
 export default function LeaveManagementDashboard() {
   const [mounted, setMounted] = useState(false);
@@ -30,11 +31,12 @@ export default function LeaveManagementDashboard() {
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'calendar' | 'history'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'calendar' | 'history' | 'guide'>('dashboard');
 
   // Modals state
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [preselectedType, setPreselectedType] = useState<LeaveType | null>(null);
+  const [prefilledDates, setPrefilledDates] = useState<{ startDate?: string; endDate?: string; reason?: string } | null>(null);
 
   const [isEmailDraftOpen, setIsEmailDraftOpen] = useState(false);
   const [activeLeaveForDraft, setActiveLeaveForDraft] = useState<LeaveRequest | null>(null);
@@ -154,11 +156,19 @@ export default function LeaveManagementDashboard() {
 
   // Leave Actions
   const handleApplyForType = (type: LeaveType) => {
+    setPrefilledDates(null);
     setPreselectedType(type);
     setIsApplyModalOpen(true);
   };
 
   const handleOpenNewLeaveModal = () => {
+    setPrefilledDates(null);
+    setPreselectedType(null);
+    setIsApplyModalOpen(true);
+  };
+
+  const handleApplyForBridge = (startDate: string, endDate: string, reason: string) => {
+    setPrefilledDates({ startDate, endDate, reason });
     setPreselectedType(null);
     setIsApplyModalOpen(true);
   };
@@ -332,6 +342,7 @@ export default function LeaveManagementDashboard() {
         onImportData={handleImportJson}
         onYearChange={setSelectedYear}
         selectedYear={selectedYear}
+        onOpenGuide={() => setActiveTab('guide')}
       />
 
       {/* Main Tabs Navigation */}
@@ -362,7 +373,15 @@ export default function LeaveManagementDashboard() {
           className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
         >
           <History size={16} />
-          <span>Application History ({leaves.filter(l => new Date(l.startDate).getFullYear() === selectedYear).length})</span>
+          <span>Application History ({leaves.filter((l) => new Date(l.startDate).getFullYear() === selectedYear).length})</span>
+        </button>
+        <button
+          id="tab-expert-guide"
+          onClick={() => setActiveTab('guide')}
+          className={`btn ${activeTab === 'guide' ? 'btn-primary' : 'btn-outline'}`}
+        >
+          <Compass size={16} />
+          <span>Expert Guide & Strategy</span>
         </button>
       </div>
 
@@ -417,14 +436,29 @@ export default function LeaveManagementDashboard() {
         />
       )}
 
+      {/* TAB 4: Expert Guide & Playbook */}
+      {activeTab === 'guide' && (
+        <ExpertGuideView
+          onApplyForBridge={handleApplyForBridge}
+        />
+      )}
+
       {/* Modals */}
       <ApplyLeaveModal
         isOpen={isApplyModalOpen}
-        onClose={() => setIsApplyModalOpen(false)}
+        onClose={() => {
+          setIsApplyModalOpen(false);
+          setPrefilledDates(null);
+        }}
         leaveTypes={leaveTypes}
         preselectedType={preselectedType}
         settings={settings}
         onSubmit={handleSubmitLeave}
+        leaves={leaves}
+        balances={balances}
+        initialStartDate={prefilledDates?.startDate}
+        initialEndDate={prefilledDates?.endDate}
+        initialReason={prefilledDates?.reason}
       />
 
       <EmailDraftModal

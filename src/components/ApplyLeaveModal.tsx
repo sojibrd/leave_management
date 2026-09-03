@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { LeaveAttachment, LeaveRequest, LeaveType, UserSettings } from '../types/leave';
-import { calculateWorkingDays, formatFriendlyDate, toDateString } from '../lib/calculator';
-import { X, Calendar, AlertCircle, FileText, Check, Paperclip, Trash2 } from 'lucide-react';
+import { LeaveAttachment, LeaveBalanceSummary, LeaveRequest, LeaveType, UserSettings } from '../types/leave';
+import { calculateWorkingDays, checkLeaveOverlap, formatFriendlyDate, splitCrossYearLeave, toDateString } from '../lib/calculator';
+import { X, Calendar, AlertCircle, AlertTriangle, Info, FileText, Check, Paperclip, Trash2 } from 'lucide-react';
 
 interface ApplyLeaveModalProps {
   isOpen: boolean;
@@ -12,6 +12,11 @@ interface ApplyLeaveModalProps {
   preselectedType?: LeaveType | null;
   settings: UserSettings;
   onSubmit: (leave: Omit<LeaveRequest, 'id'>) => Promise<LeaveRequest>;
+  leaves?: LeaveRequest[];
+  balances?: LeaveBalanceSummary[];
+  initialStartDate?: string;
+  initialEndDate?: string;
+  initialReason?: string;
 }
 
 export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
@@ -20,7 +25,12 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
   leaveTypes,
   preselectedType,
   settings,
-  onSubmit
+  onSubmit,
+  leaves = [],
+  balances = [],
+  initialStartDate,
+  initialEndDate,
+  initialReason
 }) => {
   const todayStr = useMemo(() => toDateString(new Date()), []);
 
@@ -56,9 +66,13 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
     }
   }, [preselectedType, uniqueLeaveTypes, selectedTypeId]);
 
-  // Reset form when modal opens/closes
+  // Reset or initialize form when modal opens/closes
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      if (initialStartDate) setStartDate(initialStartDate);
+      if (initialEndDate) setEndDate(initialEndDate);
+      if (initialReason) setReason(initialReason);
+    } else {
       setStartDate(todayStr);
       setEndDate(todayStr);
       setIsHalfDay(false);
@@ -71,7 +85,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
       setIsSubmitting(false);
       setSelectedTypeId(0);
     }
-  }, [isOpen, todayStr]);
+  }, [isOpen, todayStr, initialStartDate, initialEndDate, initialReason]);
 
   // If start date is after end date, automatically sync end date to start date
   const handleStartDateChange = (val: string) => {
@@ -99,6 +113,37 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
       isHalfDay
     );
   }, [startDate, endDate, isHalfDay, settings.weekendDays, settings.customHolidays]);
+
+  // Overlap conflict detection
+  const overlapResult = useMemo(() => {
+    if (!startDate || (!isHalfDay && !endDate)) {
+      return { hasConflict: false };
+    }
+    return checkLeaveOverlap(
+      startDate,
+      isHalfDay ? startDate : endDate,
+      isHalfDay,
+      halfDayPeriod,
+      leaves
+    );
+  }, [startDate, endDate, isHalfDay, halfDayPeriod, leaves]);
+
+  // Selected leave type balance & quota exhaustion check
+  const selectedBalance = useMemo(() => {
+    if (!selectedTypeId || !balances || balances.length === 0) return null;
+    return balances.find((b) => b.leaveType.id === selectedTypeId) || null;
+  }, [selectedTypeId, balances]);
+
+  const exceedsQuota = useMemo(() => {
+    if (!selectedBalance || calculation.workingDays <= 0) return false;
+    return calculation.workingDays > selectedBalance.remainingDays;
+  }, [selectedBalance, calculation.workingDays]);
+
+  // Cross-year partition check
+  const crossYearPartitions = useMemo(() => {
+    if (!startDate || (!isHalfDay && !endDate)) return [];
+    return splitCrossYearLeave(startDate, isHalfDay ? startDate : endDate);
+  }, [startDate, endDate, isHalfDay]);
 
   // File upload handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +198,10 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
     }
     if (calculation.workingDays <= 0) {
       setError('Selected dates fall entirely on weekends or official holidays (0 working days). Please choose valid working days.');
+      return;
+    }
+    if (overlapResult.hasConflict) {
+      setError(overlapResult.conflictReason || 'The selected dates conflict with an existing leave.');
       return;
     }
     if (!reason.trim()) {
@@ -407,6 +456,81 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
             )}
           </div>
 
+          {/* Overlap Conflict Alert */}
+          {overlapResult.hasConflict && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.625rem',
+              backgroundColor: 'rgba(244, 63, 94, 0.12)',
+              color: 'var(--accent-rose)',
+              border: '1px solid rgba(244, 63, 94, 0.3)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.75rem 1rem',
+              fontSize: '0.8125rem',
+              marginBottom: '1.25rem',
+              lineHeight: 1.4
+            }}>
+              <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong style={{ display: 'block', marginBottom: '2px' }}>Date Conflict Detected</strong>
+                <span>{overlapResult.conflictReason}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Quota Exhaustion / LOP Notice */}
+          {exceedsQuota && !overlapResult.hasConflict && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.625rem',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)',
+              color: '#d97706',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.75rem 1rem',
+              fontSize: '0.8125rem',
+              marginBottom: '1.25rem',
+              lineHeight: 1.4
+            }}>
+              <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong style={{ display: 'block', marginBottom: '2px' }}>Quota Notice</strong>
+                <span>
+                  You are requesting <strong>{calculation.workingDays} working days</strong>, but you only have{' '}
+                  <strong>{selectedBalance?.remainingDays ?? 0} days</strong> remaining in {selectedBalance?.leaveType.name}.
+                  Submitting this will exceed your allocated balance and may be treated as Unpaid Leave (LOP).
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Cross-Year Crossover Info */}
+          {crossYearPartitions.length > 1 && !overlapResult.hasConflict && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.625rem',
+              backgroundColor: 'rgba(59, 130, 246, 0.12)',
+              color: '#2563eb',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.75rem 1rem',
+              fontSize: '0.8125rem',
+              marginBottom: '1.25rem',
+              lineHeight: 1.4
+            }}>
+              <Info size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong style={{ display: 'block', marginBottom: '2px' }}>Cross-Year Application</strong>
+                <span>
+                  This leave spans across calendar years ({crossYearPartitions.map((p) => p.year).join(' & ')}). Days will be distributed to each respective year's quota.
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Reason Input */}
           <div className="form-group">
             <label className="form-label">
@@ -519,7 +643,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
               id="btn-submit-leave-form"
               type="submit"
               className="btn btn-primary"
-              disabled={isSubmitting || calculation.workingDays <= 0}
+              disabled={isSubmitting || calculation.workingDays <= 0 || overlapResult.hasConflict}
             >
               {isSubmitting ? (
                 <span>Submitting...</span>

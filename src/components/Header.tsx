@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { UserSettings } from '../types/leave';
-import { Calendar, Download, Upload, Moon, Sun, Settings, UserCheck } from 'lucide-react';
+import { Calendar, Download, Upload, Moon, Sun, Settings, UserCheck, Compass } from 'lucide-react';
 
 interface HeaderProps {
   settings: UserSettings;
@@ -13,6 +13,7 @@ interface HeaderProps {
   onImportData: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onYearChange: (year: number) => void;
   selectedYear: number;
+  onOpenGuide?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,7 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   onExportData,
   onImportData,
   onYearChange,
-  selectedYear
+  selectedYear,
+  onOpenGuide
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -139,6 +141,19 @@ export const Header: React.FC<HeaderProps> = ({
           <Upload size={15} />
           <span>Restore</span>
         </button>
+
+        {/* Expert Guide */}
+        {onOpenGuide && (
+          <button
+            id="btn-open-guide-header"
+            onClick={onOpenGuide}
+            className="btn btn-secondary btn-sm"
+            title="Master Leave Strategy & Playbook"
+          >
+            <Compass size={15} color="var(--primary)" />
+            <span>Guide</span>
+          </button>
+        )}
 
         {/* Settings */}
         <button
