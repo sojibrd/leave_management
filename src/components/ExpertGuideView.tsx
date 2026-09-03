@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { UserSettings } from '../types/leave';
+import { findOptimalHolidayBridges } from '../lib/calculator';
 import { 
   Compass, 
   Sparkles, 
@@ -20,9 +22,17 @@ import {
 
 interface ExpertGuideViewProps {
   onApplyForBridge?: (startDate: string, endDate: string, reason: string) => void;
+  settings?: UserSettings;
+  selectedYear?: number;
+  onOpenSettings?: () => void;
 }
 
-export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({ onApplyForBridge }) => {
+export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({ 
+  onApplyForBridge,
+  settings,
+  selectedYear = new Date().getFullYear(),
+  onOpenSettings
+}) => {
   const [activeSection, setActiveSection] = useState<'hacks' | 'edgecases' | 'handover' | 'ooo'>('hacks');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -32,55 +42,12 @@ export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({ onApplyForBrid
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const holidayHacks = [
-    {
-      id: 'mar-sprint',
-      title: 'স্বাধীনতা দিবস আল্ট্রা-স্প্রিন্ট (মার্চ ২০২৬)',
-      tag: '🔥 ৫ দিন ছুটি = ১১ দিন ভ্যাকেশন',
-      badgeColor: 'var(--accent-rose)',
-      startDate: '2026-03-29',
-      endDate: '2026-04-02',
-      reason: 'স্বাধীনতা দিবস সংলগ্ন পারিবারিক অবকাশ ও রিচার্জ স্প্রিন্ট',
-      breakdown: [
-        { date: '২৬ মার্চ (বৃহস্পতি)', label: 'স্বাধীনতা দিবস (সরকারি ছুটি)', type: 'holiday' },
-        { date: '২৭-২৮ মার্চ (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' },
-        { date: '২৯ মার্চ - ০২ এপ্রিল (রবি-বৃহস্পতি)', label: '৫ দিন Annual Leave নিন', type: 'leave' },
-        { date: '০৩-০৪ এপ্রিল (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' }
-      ],
-      description: 'স্বাধীনতা দিবস ও দুই সপ্তাহের উইকেন্ডের সাথে মাত্র ৫ দিনের বাৎসরিক ছুটি ব্রিজিং করে টানা ১১ দিনের নিরবচ্ছিন্ন ছুটি উপভোগ করুন।'
-    },
-    {
-      id: 'eid-bridge',
-      title: 'ঈদুল ফিতর গোল্ডেন ব্রিজ (মার্চ ২০২৬)',
-      tag: '⚡ ২ দিন ছুটি = ৮ দিন ভ্যাকেশন',
-      badgeColor: 'var(--accent-amber)',
-      startDate: '2026-03-22',
-      endDate: '2026-03-23',
-      reason: 'ঈদের উদযাপন ও পরিবারের সাথে সময় কাটানো',
-      breakdown: [
-        { date: '২০-২১ মার্চ (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' },
-        { date: '২২-২৩ মার্চ (রবি-সোম)', label: '২ দিন Annual/Casual Leave নিন', type: 'leave' },
-        { date: '২৪-২৬ মার্চ (মঙ্গল-বৃহস্পতি)', label: 'ঈদ ও স্বাধীনতা দিবসের সরকারি ছুটি', type: 'holiday' },
-        { date: '২৭-২৮ মার্চ (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' }
-      ],
-      description: 'ঈদের সরকারি ছুটির আগে মাত্র ২ দিনের ব্রিজ লিভ নিয়ে যাতায়াতের প্রচণ্ড ভিড় এড়িয়ে টানা ৮ দিনের স্বস্তিদায়ক ছুটি পান।'
-    },
-    {
-      id: 'dec-sprint',
-      title: 'বিজয় দিবস ও ইয়ার-এন্ড রিচার্জ (ডিসেম্বর ২০২৬)',
-      tag: '❄️ ৩ দিন ছুটি = ৭ দিন অফ',
-      badgeColor: 'var(--primary)',
-      startDate: '2026-12-13',
-      endDate: '2026-12-15',
-      reason: 'বাৎসরিক কাজের ক্লান্তি দূর করতে ইয়ার-এন্ড ট্রাভেল',
-      breakdown: [
-        { date: '১১-১২ ডিসেম্বর (শুক্র-শনি)', label: 'সাপ্তাহিক ছুটি (উইকেন্ড)', type: 'weekend' },
-        { date: '১৩-১৫ ডিসেম্বর (রবি-মঙ্গল)', label: '৩ দিন Annual Leave নিন', type: 'leave' },
-        { date: '১৬ ডিসেম্বর (বুধ)', label: 'বিজয় দিবস (সরকারি ছুটি)', type: 'holiday' }
-      ],
-      description: 'বিজয় দিবসের সাথে ৩ দিনের ছুটি মিলিয়ে বাৎসরিক লক্ষ্যমাত্রা সমাপ্তির আগে নিজের মানসিক শক্তি রিচার্জ করে নিন।'
-    }
-  ];
+  // Dynamically calculate optimal holiday bridge hacks based on configured holidays, weekends, and year!
+  const holidayHacks = useMemo(() => {
+    const holidays = settings?.customHolidays || [];
+    const weekends = settings?.weekendDays || [5, 6];
+    return findOptimalHolidayBridges(holidays, weekends, selectedYear);
+  }, [settings?.customHolidays, settings?.weekendDays, selectedYear]);
 
   const edgeCases = [
     {
@@ -209,7 +176,7 @@ Best regards,
             style={{ border: activeSection === 'hacks' ? undefined : 'none' }}
           >
             <Sparkles size={14} />
-            <span>২০২৬ হলিডে হ্যাকস</span>
+            <span>{selectedYear} হলিডে হ্যাকস ({holidayHacks.length})</span>
           </button>
           <button
             onClick={() => setActiveSection('edgecases')}
@@ -238,19 +205,45 @@ Best regards,
         </div>
       </div>
 
-      {/* SECTION 1: 2026 HOLIDAY HACKS */}
+      {/* SECTION 1: DYNAMIC HOLIDAY HACKS */}
       {activeSection === 'hacks' && (
         <div>
           <div style={{ marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              কৌশলগত ছুটি ব্রিজিং (বাংলাদেশ ২০২৬)
+              কৌশলগত ছুটি ব্রিজিং ({selectedYear})
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              সরকারি ছুটি ও উইকেন্ডের সাথে মিলিয়ে সামান্য ছুটি খরচ করে দীর্ঘ ভ্যাকেশন আনলক করুন।
+              সেটিংসে থাকা সরকারি ও কাস্টম ছুটি এবং উইকেন্ড বিশ্লেষণ করে স্বয়ংক্রিয়ভাবে তৈরি সেরা ভ্যাকেশন ব্রিজ।
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+          {holidayHacks.length === 0 ? (
+            <div style={{
+              backgroundColor: 'var(--bg-surface-subtle)',
+              border: '1px dashed var(--border-subtle)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '2.5rem 1.5rem',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              <Calendar size={36} color="var(--primary)" />
+              <h4 style={{ fontSize: '1.05rem', fontWeight: 700 }}>
+                {selectedYear} সালের জন্য কোনো লিভ-ব্রিজিং সুযোগ পাওয়া যায়নি
+              </h4>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.5 }}>
+                আপনি সেটিংস থেকে নতুন সরকারি বা কাস্টম ছুটি যোগ করলে সিস্টেম স্বয়ংক্রিয়ভাবে এখানে সেরা ছুটির ব্রিজিং সুযোগগুলো তৈরি করে দেবে।
+              </p>
+              {onOpenSettings && (
+                <button onClick={onOpenSettings} className="btn btn-primary btn-sm" style={{ marginTop: '0.5rem' }}>
+                  <span>সেটিংস থেকে ছুটি যোগ করুন</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
             {holidayHacks.map((hack) => (
               <div
                 key={hack.id}
@@ -332,8 +325,9 @@ Best regards,
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    )}
 
       {/* SECTION 2: EDGE CASE MATRIX */}
       {activeSection === 'edgecases' && (

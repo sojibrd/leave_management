@@ -440,6 +440,9 @@ export default function LeaveManagementDashboard() {
       {activeTab === 'guide' && (
         <ExpertGuideView
           onApplyForBridge={handleApplyForBridge}
+          settings={settings}
+          selectedYear={selectedYear}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
       )}
 
