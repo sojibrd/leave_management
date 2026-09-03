@@ -56,8 +56,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   designation: 'Software Engineer',
   department: 'Product & Engineering',
   companyName: 'Acme Technologies Ltd.',
-  managerName: 'Team Lead / Manager',
-  managerEmail: 'lead@company.com',
+  managerName: 'Mr. Adnan',
+  managerEmail: 'adnan@company.com',
   hrEmail: 'hr@company.com',
   weekendDays: [5, 6], // Friday & Saturday
   currentYear: new Date().getFullYear(),

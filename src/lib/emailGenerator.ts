@@ -28,7 +28,12 @@ export function generateLeaveEmailDraft(
       } has kindly agreed to handle any urgent deliverables or handovers.`
     : `I have ensured all my pending deliverables are updated and prioritized ahead of my leave.`;
 
-  const body = `Dear ${settings.managerName || 'Manager'},
+  const managerTitle = settings.managerName?.trim() || 'Mr. Adnan';
+  const greeting = managerTitle.toLowerCase().includes('hr')
+    ? managerTitle
+    : `${managerTitle} & HR Team`;
+
+  const body = `Dear ${greeting},
 
 I am writing to formally request leave of absence from the office.
 
