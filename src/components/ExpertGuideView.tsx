@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { UserSettings } from '../types/leave';
-import { findOptimalHolidayBridges } from '../lib/calculator';
+import { findOptimalHolidayBridges, toDateString } from '../lib/calculator';
 import { 
   Compass, 
   Sparkles, 
@@ -33,7 +33,9 @@ export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({
   selectedYear = new Date().getFullYear(),
   onOpenSettings
 }) => {
+  const todayStr = useMemo(() => toDateString(new Date()), []);
   const [activeSection, setActiveSection] = useState<'hacks' | 'edgecases' | 'handover' | 'ooo'>('hacks');
+  const [showPastHacks, setShowPastHacks] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, id: string) => {
@@ -43,11 +45,19 @@ export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({
   };
 
   // Dynamically calculate optimal holiday bridge hacks based on configured holidays, weekends, and year!
-  const holidayHacks = useMemo(() => {
+  const allHolidayHacks = useMemo(() => {
     const holidays = settings?.customHolidays || [];
     const weekends = settings?.weekendDays || [5, 6];
     return findOptimalHolidayBridges(holidays, weekends, selectedYear);
   }, [settings?.customHolidays, settings?.weekendDays, selectedYear]);
+
+  // Filter only upcoming hacks where the leave/holiday period hasn't ended yet
+  const upcomingHacks = useMemo(() => {
+    return allHolidayHacks.filter((hack) => hack.endDate >= todayStr);
+  }, [allHolidayHacks, todayStr]);
+
+  const pastHacksCount = allHolidayHacks.length - upcomingHacks.length;
+  const displayedHacks = showPastHacks ? allHolidayHacks : upcomingHacks;
 
   const edgeCases = [
     {
@@ -176,7 +186,7 @@ Best regards,
             style={{ border: activeSection === 'hacks' ? undefined : 'none' }}
           >
             <Sparkles size={14} />
-            <span>{selectedYear} হলিডে হ্যাকস ({holidayHacks.length})</span>
+            <span>{selectedYear} আপকামিং হ্যাকস ({upcomingHacks.length})</span>
           </button>
           <button
             onClick={() => setActiveSection('edgecases')}
@@ -205,19 +215,41 @@ Best regards,
         </div>
       </div>
 
-      {/* SECTION 1: DYNAMIC HOLIDAY HACKS */}
+      {/* SECTION 1: DYNAMIC HOLIDAY HACKS (UPCOMING ONLY BY DEFAULT) */}
       {activeSection === 'hacks' && (
         <div>
-          <div style={{ marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              কৌশলগত ছুটি ব্রিজিং ({selectedYear})
-            </h3>
-            <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              সেটিংসে থাকা সরকারি ও কাস্টম ছুটি এবং উইকেন্ড বিশ্লেষণ করে স্বয়ংক্রিয়ভাবে তৈরি সেরা ভ্যাকেশন ব্রিজ।
-            </p>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            marginBottom: '1.25rem'
+          }}>
+            <div>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
+                {showPastHacks ? `সকল ছুটির ব্রিজিং (${selectedYear})` : `আসন্ন ছুটির কৌশলগত ব্রিজিং (${selectedYear})`}
+              </h3>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                {showPastHacks
+                  ? `এই বছরের অতীতের ও আসন্ন মিলিয়ে সকল ${allHolidayHacks.length}টি সুযোগ দেখানো হচ্ছে।`
+                  : `আজকের পর থেকে সামনের সেরা ভ্যাকেশন স্প্রিন্টগুলো দেখানো হচ্ছে (অতীতের ছুটিগুলো স্বয়ংক্রিয়ভাবে বাদ দেওয়া হয়েছে)।`}
+              </p>
+            </div>
+
+            {pastHacksCount > 0 && (
+              <button
+                onClick={() => setShowPastHacks(!showPastHacks)}
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: '0.75rem' }}
+                title="অতীতের সুযোগগুলো দেখা বা লুকানোর টগল"
+              >
+                <span>{showPastHacks ? 'শুধু আপকামিং দেখুন' : `অতীতের ${pastHacksCount}টি দেখুন`}</span>
+              </button>
+            )}
           </div>
 
-          {holidayHacks.length === 0 ? (
+          {displayedHacks.length === 0 ? (
             <div style={{
               backgroundColor: 'var(--bg-surface-subtle)',
               border: '1px dashed var(--border-subtle)',
@@ -231,20 +263,29 @@ Best regards,
             }}>
               <Calendar size={36} color="var(--primary)" />
               <h4 style={{ fontSize: '1.05rem', fontWeight: 700 }}>
-                {selectedYear} সালের জন্য কোনো লিভ-ব্রিজিং সুযোগ পাওয়া যায়নি
+                {selectedYear} সালের জন্য আর কোনো আসন্ন লিভ-ব্রিজিং সুযোগ বাকি নেই
               </h4>
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.5 }}>
-                আপনি সেটিংস থেকে নতুন সরকারি বা কাস্টম ছুটি যোগ করলে সিস্টেম স্বয়ংক্রিয়ভাবে এখানে সেরা ছুটির ব্রিজিং সুযোগগুলো তৈরি করে দেবে।
+                {pastHacksCount > 0
+                  ? `এই বছরের পূর্ববর্তী ${pastHacksCount}টি সুযোগ ইতিমধ্যে পার হয়ে গেছে। সামনের দিনগুলোর জন্য সেটিংস থেকে নতুন কাস্টম ছুটি যোগ করতে পারেন।`
+                  : 'আপনি সেটিংস থেকে নতুন সরকারি বা কাস্টম ছুটি যোগ করলে সিস্টেম স্বয়ংক্রিয়ভাবে এখানে সেরা ছুটির ব্রিজিং সুযোগগুলো তৈরি করে দেবে।'}
               </p>
-              {onOpenSettings && (
-                <button onClick={onOpenSettings} className="btn btn-primary btn-sm" style={{ marginTop: '0.5rem' }}>
-                  <span>সেটিংস থেকে ছুটি যোগ করুন</span>
-                </button>
-              )}
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {pastHacksCount > 0 && !showPastHacks && (
+                  <button onClick={() => setShowPastHacks(true)} className="btn btn-secondary btn-sm">
+                    <span>অতীতের {pastHacksCount}টি দেখুন</span>
+                  </button>
+                )}
+                {onOpenSettings && (
+                  <button onClick={onOpenSettings} className="btn btn-primary btn-sm">
+                    <span>সেটিংস থেকে ছুটি যোগ করুন</span>
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
-            {holidayHacks.map((hack) => (
+            {displayedHacks.map((hack) => (
               <div
                 key={hack.id}
                 className="card"
