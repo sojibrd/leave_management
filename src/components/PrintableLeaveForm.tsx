@@ -27,13 +27,12 @@ export const PrintableLeaveForm: React.FC<PrintableLeaveFormProps> = ({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal-content printable-document"
+        className="modal-content printable-document printable-content"
         onClick={(e) => e.stopPropagation()}
         style={{
           maxWidth: '750px',
           background: '#ffffff',
           color: '#1e293b',
-          padding: '2.5rem 3rem',
           borderRadius: 'var(--radius-md)'
         }}
       >
@@ -81,7 +80,7 @@ export const PrintableLeaveForm: React.FC<PrintableLeaveFormProps> = ({
             <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.5rem', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem' }}>
               1. Employee Particulars
             </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.875rem' }}>
+            <div className="form-grid-2" style={{ gap: '0.75rem', fontSize: '0.875rem' }}>
               <div>
                 <strong style={{ color: '#475569' }}>Name:</strong> {settings.employeeName}
               </div>
@@ -102,17 +101,17 @@ export const PrintableLeaveForm: React.FC<PrintableLeaveFormProps> = ({
             <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.5rem', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem' }}>
               2. Leave Particulars
             </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.875rem' }}>
+            <div className="form-grid-2" style={{ gap: '0.75rem', fontSize: '0.875rem' }}>
               <div>
                 <strong style={{ color: '#475569' }}>Leave Type:</strong> {leave.leaveTypeName} ({leave.leaveTypeCode})
               </div>
               <div>
                 <strong style={{ color: '#475569' }}>Total Working Days:</strong> {leave.totalDays} Day(s) {leave.isHalfDay ? `(Half Day - ${leave.halfDayPeriod})` : ''}
               </div>
-              <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ gridColumn: 'span 1' }}>
                 <strong style={{ color: '#475569' }}>Period of Leave:</strong> {formatFriendlyDateRange(leave.startDate, leave.endDate)}
               </div>
-              <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ gridColumn: 'span 1' }}>
                 <strong style={{ color: '#475569' }}>Reason for Leave:</strong> {leave.reason}
               </div>
             </div>
@@ -123,7 +122,7 @@ export const PrintableLeaveForm: React.FC<PrintableLeaveFormProps> = ({
             <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.5rem', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.25rem' }}>
               3. Handover & Backup Arrangement
             </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.875rem' }}>
+            <div className="form-grid-2" style={{ gap: '0.75rem', fontSize: '0.875rem' }}>
               <div>
                 <strong style={{ color: '#475569' }}>Backup Person:</strong> {leave.backupPerson || 'N/A'}
               </div>
@@ -134,10 +133,7 @@ export const PrintableLeaveForm: React.FC<PrintableLeaveFormProps> = ({
           </div>
 
           {/* Signature Blocks */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '1.5rem',
+          <div className="printable-signatures" style={{
             marginTop: '3.5rem',
             textAlign: 'center',
             fontSize: '0.8125rem'

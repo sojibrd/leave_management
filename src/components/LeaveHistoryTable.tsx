@@ -71,9 +71,9 @@ export const LeaveHistoryTable: React.FC<LeaveHistoryTableProps> = ({
         </div>
 
         {/* Filter Bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', width: '100%', maxWidth: '520px' }}>
           {/* Search Box */}
-          <div style={{ position: 'relative', width: '220px' }}>
+          <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '140px' }}>
             <Search
               size={15}
               style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
@@ -95,7 +95,9 @@ export const LeaveHistoryTable: React.FC<LeaveHistoryTableProps> = ({
             backgroundColor: 'var(--bg-surface-subtle)',
             borderRadius: 'var(--radius-md)',
             padding: '0.2rem',
-            border: '1px solid var(--border-subtle)'
+            border: '1px solid var(--border-subtle)',
+            overflowX: 'auto',
+            maxWidth: '100%'
           }}>
             {(['all', 'pending', 'approved', 'rejected'] as const).map((st) => (
               <button
@@ -111,6 +113,7 @@ export const LeaveHistoryTable: React.FC<LeaveHistoryTableProps> = ({
                   borderRadius: 'var(--radius-sm)',
                   cursor: 'pointer',
                   textTransform: 'capitalize',
+                  whiteSpace: 'nowrap',
                   transition: 'all 0.15s'
                 }}
               >
@@ -121,7 +124,7 @@ export const LeaveHistoryTable: React.FC<LeaveHistoryTableProps> = ({
         </div>
       </div>
 
-      {/* Table Container */}
+      {/* Table & Cards Container */}
       {filteredLeaves.length === 0 ? (
         <div style={{
           textAlign: 'center',
@@ -137,103 +140,254 @@ export const LeaveHistoryTable: React.FC<LeaveHistoryTableProps> = ({
           </div>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'separate',
-            borderSpacing: '0 6px',
-            fontSize: '0.8125rem'
-          }}>
-            <thead>
-              <tr style={{ color: 'var(--text-muted)', textAlign: 'left', fontSize: '0.75rem' }}>
-                <th style={{ padding: '0.5rem 0.75rem' }}>LEAVE TYPE</th>
-                <th style={{ padding: '0.5rem 0.75rem' }}>DURATION & DATES</th>
-                <th style={{ padding: '0.5rem 0.75rem' }}>DAYS</th>
-                <th style={{ padding: '0.5rem 0.75rem' }}>REASON & BACKUP</th>
-                <th style={{ padding: '0.5rem 0.75rem' }}>STATUS</th>
-                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeaves.map((l) => (
-                <tr
-                  key={l.id}
-                  style={{
-                    backgroundColor: 'var(--bg-surface-elevated)',
-                    boxShadow: 'var(--shadow-sm)',
-                    transition: 'background-color 0.15s'
-                  }}
-                >
-                  {/* Leave Type */}
-                  <td style={{
-                    padding: '0.75rem',
-                    borderTopLeftRadius: 'var(--radius-md)',
-                    borderBottomLeftRadius: 'var(--radius-md)',
-                    fontWeight: 700
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{
-                        padding: '0.2rem 0.4rem',
-                        fontSize: '0.7rem',
-                        fontWeight: 800,
-                        borderRadius: 'var(--radius-sm)',
-                        backgroundColor: 'var(--bg-surface-subtle)',
-                        border: '1px solid var(--border-subtle)',
-                        color: 'var(--primary)'
-                      }}>
-                        {l.leaveTypeCode}
-                      </span>
-                      <span>{l.leaveTypeName}</span>
-                    </div>
-                  </td>
-
-                  {/* Dates */}
-                  <td style={{ padding: '0.75rem', color: 'var(--text-primary)', fontWeight: 500 }}>
-                    <div>{formatFriendlyDateRange(l.startDate, l.endDate)}</div>
-                    {l.isHalfDay && (
-                      <div style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', fontWeight: 600 }}>
-                        Half Day ({l.halfDayPeriod === 'first-half' ? '1st Half' : '2nd Half'})
+        <>
+          {/* Desktop Table View (>= 769px) */}
+          <div className="desktop-table-view" style={{ overflowX: 'auto' }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'separate',
+              borderSpacing: '0 6px',
+              fontSize: '0.8125rem'
+            }}>
+              <thead>
+                <tr style={{ color: 'var(--text-muted)', textAlign: 'left', fontSize: '0.75rem' }}>
+                  <th style={{ padding: '0.5rem 0.75rem' }}>LEAVE TYPE</th>
+                  <th style={{ padding: '0.5rem 0.75rem' }}>DURATION & DATES</th>
+                  <th style={{ padding: '0.5rem 0.75rem' }}>DAYS</th>
+                  <th style={{ padding: '0.5rem 0.75rem' }}>REASON & BACKUP</th>
+                  <th style={{ padding: '0.5rem 0.75rem' }}>STATUS</th>
+                  <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLeaves.map((l) => (
+                  <tr
+                    key={l.id}
+                    style={{
+                      backgroundColor: 'var(--bg-surface-elevated)',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'background-color 0.15s'
+                    }}
+                  >
+                    {/* Leave Type */}
+                    <td style={{
+                      padding: '0.75rem',
+                      borderTopLeftRadius: 'var(--radius-md)',
+                      borderBottomLeftRadius: 'var(--radius-md)',
+                      fontWeight: 700
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{
+                          padding: '0.2rem 0.4rem',
+                          fontSize: '0.7rem',
+                          fontWeight: 800,
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'var(--bg-surface-subtle)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--primary)'
+                        }}>
+                          {l.leaveTypeCode}
+                        </span>
+                        <span>{l.leaveTypeName}</span>
                       </div>
-                    )}
-                  </td>
+                    </td>
 
-                  {/* Total Days */}
-                  <td style={{ padding: '0.75rem' }}>
+                    {/* Dates */}
+                    <td style={{ padding: '0.75rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                      <div>{formatFriendlyDateRange(l.startDate, l.endDate)}</div>
+                      {l.isHalfDay && (
+                        <div style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', fontWeight: 600 }}>
+                          Half Day ({l.halfDayPeriod === 'first-half' ? '1st Half' : '2nd Half'})
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Total Days */}
+                    <td style={{ padding: '0.75rem' }}>
+                      <span style={{
+                        fontWeight: 800,
+                        fontSize: '0.9375rem',
+                        color: 'var(--text-primary)'
+                      }}>
+                        {l.totalDays}d
+                      </span>
+                    </td>
+
+                    {/* Reason & Backup */}
+                    <td style={{ padding: '0.75rem', maxWidth: '260px' }}>
+                      <div style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: 'var(--text-secondary)'
+                      }}>
+                        {l.reason}
+                      </div>
+                      {l.backupPerson && (
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          Handover: {l.backupPerson}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Status Dropdown / Action */}
+                    <td style={{ padding: '0.75rem' }}>
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveDropdownId(activeDropdownId === l.id ? null : l.id!)}
+                          className={`badge badge-${l.status}`}
+                          style={{ cursor: 'pointer', border: 'none' }}
+                          title="Click to change status"
+                        >
+                          {l.status === 'approved' && <CheckCircle2 size={12} />}
+                          {l.status === 'pending' && <Clock size={12} />}
+                          {l.status === 'rejected' && <XCircle size={12} />}
+                          <span>{l.status}</span>
+                          <ChevronDown size={11} style={{ marginLeft: '2px' }} />
+                        </button>
+
+                        {activeDropdownId === l.id && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            marginTop: '4px',
+                            backgroundColor: 'var(--bg-surface)',
+                            border: '1px solid var(--border-strong)',
+                            borderRadius: 'var(--radius-md)',
+                            boxShadow: 'var(--shadow-lg)',
+                            zIndex: 50,
+                            minWidth: '130px',
+                            padding: '0.35rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px'
+                          }}>
+                            {(['pending', 'approved', 'rejected'] as LeaveStatus[]).map((st) => (
+                              <button
+                                key={st}
+                                onClick={async () => {
+                                  await onUpdateStatus(l.id!, st);
+                                  setActiveDropdownId(null);
+                                }}
+                                style={{
+                                  border: 'none',
+                                  background: l.status === st ? 'var(--bg-surface-subtle)' : 'transparent',
+                                  color: 'var(--text-primary)',
+                                  textAlign: 'left',
+                                  padding: '0.4rem 0.6rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  fontSize: '0.75rem',
+                                  fontWeight: l.status === st ? 700 : 500,
+                                  cursor: 'pointer',
+                                  textTransform: 'capitalize'
+                                }}
+                              >
+                                Mark as {st}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Actions */}
+                    <td style={{
+                      padding: '0.75rem',
+                      textAlign: 'right',
+                      borderTopRightRadius: 'var(--radius-md)',
+                      borderBottomRightRadius: 'var(--radius-md)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.35rem' }}>
+                        <button
+                          onClick={() => onViewEmailDraft(l)}
+                          className="btn btn-secondary btn-icon-only"
+                          title="View & copy official email notice"
+                          style={{ padding: '0.35rem' }}
+                        >
+                          <Mail size={14} />
+                        </button>
+                        <button
+                          onClick={() => onPrintForm(l)}
+                          className="btn btn-secondary btn-icon-only"
+                          title="Print / Save PDF Leave Application"
+                          style={{ padding: '0.35rem' }}
+                        >
+                          <Printer size={14} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Delete this leave record (${l.leaveTypeName}: ${l.startDate})?`)) {
+                              onDeleteLeave(l.id!);
+                            }
+                          }}
+                          className="btn btn-danger btn-icon-only"
+                          title="Delete leave record"
+                          style={{ padding: '0.35rem' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards View (<= 768px) */}
+          <div className="mobile-cards-view">
+            {filteredLeaves.map((l) => (
+              <div
+                key={l.id}
+                style={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.625rem',
+                  boxShadow: 'var(--shadow-sm)'
+                }}
+              >
+                {/* Header Row: Type, Status, Days */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{
+                      padding: '0.2rem 0.45rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'var(--bg-surface-subtle)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--primary)'
+                    }}>
+                      {l.leaveTypeCode}
+                    </span>
+                    <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>{l.leaveTypeName}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span style={{
                       fontWeight: 800,
                       fontSize: '0.9375rem',
-                      color: 'var(--text-primary)'
+                      color: 'var(--text-primary)',
+                      backgroundColor: 'var(--bg-surface-subtle)',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: 'var(--radius-sm)'
                     }}>
                       {l.totalDays}d
                     </span>
-                  </td>
 
-                  {/* Reason & Backup */}
-                  <td style={{ padding: '0.75rem', maxWidth: '260px' }}>
-                    <div style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      color: 'var(--text-secondary)'
-                    }}>
-                      {l.reason}
-                    </div>
-                    {l.backupPerson && (
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                        Handover: {l.backupPerson}
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Status Dropdown / Action */}
-                  <td style={{ padding: '0.75rem' }}>
+                    {/* Status dropdown */}
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                       <button
                         type="button"
                         onClick={() => setActiveDropdownId(activeDropdownId === l.id ? null : l.id!)}
                         className={`badge badge-${l.status}`}
                         style={{ cursor: 'pointer', border: 'none' }}
-                        title="Click to change status"
                       >
                         {l.status === 'approved' && <CheckCircle2 size={12} />}
                         {l.status === 'pending' && <Clock size={12} />}
@@ -242,12 +396,11 @@ export const LeaveHistoryTable: React.FC<LeaveHistoryTableProps> = ({
                         <ChevronDown size={11} style={{ marginLeft: '2px' }} />
                       </button>
 
-                      {/* Dropdown Menu to switch status */}
                       {activeDropdownId === l.id && (
                         <div style={{
                           position: 'absolute',
                           top: '100%',
-                          left: 0,
+                          right: 0,
                           marginTop: '4px',
                           backgroundColor: 'var(--bg-surface)',
                           border: '1px solid var(--border-strong)',
@@ -286,56 +439,74 @@ export const LeaveHistoryTable: React.FC<LeaveHistoryTableProps> = ({
                         </div>
                       )}
                     </div>
-                  </td>
+                  </div>
+                </div>
 
-                  {/* Actions */}
-                  <td style={{
-                    padding: '0.75rem',
-                    textAlign: 'right',
-                    borderTopRightRadius: 'var(--radius-md)',
-                    borderBottomRightRadius: 'var(--radius-md)'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.35rem' }}>
-                      {/* View Email Draft Notice */}
-                      <button
-                        onClick={() => onViewEmailDraft(l)}
-                        className="btn btn-secondary btn-icon-only"
-                        title="View & copy official email notice"
-                        style={{ padding: '0.35rem' }}
-                      >
-                        <Mail size={14} />
-                      </button>
+                {/* Dates & Duration */}
+                <div style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                  📅 {formatFriendlyDateRange(l.startDate, l.endDate)}
+                  {l.isHalfDay && (
+                    <span style={{ fontSize: '0.72rem', color: 'var(--accent-amber)', fontWeight: 600, marginLeft: '0.5rem' }}>
+                      (Half Day - {l.halfDayPeriod === 'first-half' ? '1st Half' : '2nd Half'})
+                    </span>
+                  )}
+                </div>
 
-                      {/* Printable Form / PDF */}
-                      <button
-                        onClick={() => onPrintForm(l)}
-                        className="btn btn-secondary btn-icon-only"
-                        title="Print / Save PDF Leave Application"
-                        style={{ padding: '0.35rem' }}
-                      >
-                        <Printer size={14} />
-                      </button>
+                {/* Reason */}
+                <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Reason:</strong> {l.reason}
+                </div>
 
-                      {/* Delete */}
-                      <button
-                        onClick={() => {
-                          if (confirm(`Delete this leave record (${l.leaveTypeName}: ${l.startDate})?`)) {
-                            onDeleteLeave(l.id!);
-                          }
-                        }}
-                        className="btn btn-danger btn-icon-only"
-                        title="Delete leave record"
-                        style={{ padding: '0.35rem' }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                {/* Handover Backup */}
+                {l.backupPerson && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    🤝 <strong>Backup:</strong> {l.backupPerson} {l.backupContact ? `(${l.backupContact})` : ''}
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  gap: '0.5rem',
+                  paddingTop: '0.5rem',
+                  borderTop: '1px dashed var(--border-subtle)',
+                  marginTop: '0.25rem'
+                }}>
+                  <button
+                    onClick={() => onViewEmailDraft(l)}
+                    className="btn btn-secondary btn-sm"
+                    title="View email notice"
+                  >
+                    <Mail size={13} />
+                    <span>Email</span>
+                  </button>
+                  <button
+                    onClick={() => onPrintForm(l)}
+                    className="btn btn-secondary btn-sm"
+                    title="Print form"
+                  >
+                    <Printer size={13} />
+                    <span>Print</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Delete this leave record (${l.leaveTypeName}: ${l.startDate})?`)) {
+                        onDeleteLeave(l.id!);
+                      }
+                    }}
+                    className="btn btn-danger btn-sm"
+                    title="Delete leave"
+                  >
+                    <Trash2 size={13} />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

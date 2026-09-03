@@ -307,8 +307,9 @@ export default function LeaveManagementDashboard() {
       {toast && (
         <div style={{
           position: 'fixed',
-          bottom: '24px',
-          right: '24px',
+          bottom: '20px',
+          right: '20px',
+          maxWidth: 'calc(100vw - 40px)',
           zIndex: 9999,
           display: 'flex',
           alignItems: 'center',
@@ -346,32 +347,25 @@ export default function LeaveManagementDashboard() {
         onOpenGuide={() => setActiveTab('guide')}
       />
 
-      {/* Main Tabs Navigation */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        marginBottom: '1.75rem',
-        borderBottom: '1px solid var(--border-subtle)',
-        paddingBottom: '0.75rem'
-      }}>
+      {/* Main Tabs Navigation - Touch Friendly & Horizontally Scrollable on Mobile */}
+      <div className="tabs-scroll-container">
         <button
           onClick={() => setActiveTab('dashboard')}
-          className={`btn ${activeTab === 'dashboard' ? 'btn-primary' : 'btn-outline'}`}
+          className={`btn tab-btn ${activeTab === 'dashboard' ? 'btn-primary' : 'btn-outline'}`}
         >
           <Sliders size={16} />
           <span>Dashboard & Balances</span>
         </button>
         <button
           onClick={() => setActiveTab('calendar')}
-          className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
+          className={`btn tab-btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
         >
           <CalendarDays size={16} />
           <span>Leave Calendar</span>
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
+          className={`btn tab-btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
         >
           <History size={16} />
           <span>Application History ({leaves.filter((l) => new Date(l.startDate).getFullYear() === selectedYear).length})</span>
@@ -379,7 +373,7 @@ export default function LeaveManagementDashboard() {
         <button
           id="tab-analytics"
           onClick={() => setActiveTab('analytics')}
-          className={`btn ${activeTab === 'analytics' ? 'btn-primary' : 'btn-outline'}`}
+          className={`btn tab-btn ${activeTab === 'analytics' ? 'btn-primary' : 'btn-outline'}`}
         >
           <BarChart2 size={16} />
           <span>Analytics</span>
@@ -387,7 +381,7 @@ export default function LeaveManagementDashboard() {
         <button
           id="tab-expert-guide"
           onClick={() => setActiveTab('guide')}
-          className={`btn ${activeTab === 'guide' ? 'btn-primary' : 'btn-outline'}`}
+          className={`btn tab-btn ${activeTab === 'guide' ? 'btn-primary' : 'btn-outline'}`}
         >
           <Compass size={16} />
           <span>Expert Guide & Strategy</span>
@@ -403,11 +397,7 @@ export default function LeaveManagementDashboard() {
             onOpenNewLeaveModal={handleOpenNewLeaveModal}
             selectedYear={selectedYear}
           />
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1.2fr 0.8fr',
-            gap: '1.5rem'
-          }}>
+          <div className="responsive-dashboard-grid">
             <CalendarView
               leaves={leaves}
               settings={settings}

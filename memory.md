@@ -11,31 +11,16 @@ Last updated: 2026-09-04 04:58
 - **UI Components**: `Header.tsx`, `BalanceCards.tsx`, `ApplyLeaveModal.tsx`, `LeaveHistoryTable.tsx`, `CalendarView.tsx`, `SettingsModal.tsx`, `NotificationToast.tsx`
 - **Expert Guide Tab** (`ExpertGuideView.tsx`): Holiday Hacks (dynamic, upcoming-only), Edge Case Matrix, Handover Checklist, OOO Templates
 
-### এই সেশনে তৈরি/পরিবর্তন
-
-**Analytics Dashboard (AI):**
-- `src/components/AnalyticsView.tsx` [NEW]: SVG-based monthly bar chart, donut chart by type, stacked progress bars, 6 summary stat cards
-- `src/app/page.tsx`: 5th tab "Analytics" (BarChart2 icon), `AnalyticsView` wire-up
-
-**Quota Expiry Warning (AI):**
-- `src/lib/calculator.ts`: `calculateExpiryWarnings(balances, targetYear)` — triggers when remaining > 0 AND year-end < 90 days, urgencyLevel: critical/warning/info
-- `src/components/BalanceCards.tsx`: `selectedYear` prop যোগ, per-card amber/red expiry badge with pulse animation
-
-**Leave Reason Suggestions (AI):**
-- `src/lib/leaveExamples.ts` [NEW]: CL/SL/AL/CO প্রতিটিতে 10টি real-world reason string
-- `src/components/ApplyLeaveModal.tsx`: "💡 See 10 real examples for CL" toggle, chip grid, click = replace reason field, collapse on select
-
-**Email Generator fixes (USER):**
-- `src/lib/emailGenerator.ts`: greeting → `"Dear Mr. Adnan & HR Team"` (manager name থেকে dynamic), Employee ID & Department email body থেকে বাদ দেওয়া হয়েছে, `getReturnDateText()` এখন holidays-ও skip করে
-
-**Settings Modal fixes (USER):**
-- `src/components/SettingsModal.tsx`: `useEffect` দিয়ে settings/leaveTypes prop change sync, Employee ID input field UI থেকে commented out (settings object-এ থাকে)
-
-**DB defaults fix (USER):**
-- `src/lib/db.ts`: `employeeName = 'Sojib Das'`, `managerName = 'Mr. Adnan'`, `managerEmail = 'adnan@company.com'`, `settingsTable` type শুদ্ধ করা, `initializeDatabase()` এ full duplicate cleanup logic যোগ
-
-**README (USER):**
-- `README.md`: সম্পূর্ণ নতুন করে লেখা — features, setup, configuration guide
+**Full Project Mobile Responsive Overhaul (AI):**
+- `src/app/globals.css`: Added `.tabs-scroll-container`, `.responsive-dashboard-grid`, `.responsive-analytics-charts`, `.form-grid-2`, `.desktop-table-view`, `.mobile-cards-view`, `.calendar-cell-pills`, `.calendar-cell-dots`, mobile modal bottom sheets, responsive container padding
+- `src/app/page.tsx`: Scrollable tabs nav on mobile, responsive dashboard grid, responsive toast position
+- `src/components/Header.tsx`: `.hide-on-mobile` text labels for secondary buttons so action bar fits on mobile screens
+- `src/components/BalanceCards.tsx`: `minmax(240px, 1fr)` card grid for mobile devices
+- `src/components/CalendarView.tsx`: Compact mobile cells with color-coded circular dots (approved, pending, holiday) + tap-to-view date info modal
+- `src/components/LeaveHistoryTable.tsx`: Full desktop table on `>=769px`, touch-friendly mobile card view on `<=768px` with quick status and email/print/delete actions
+- `src/components/AnalyticsView.tsx`: Responsive charts grid, 2-column mobile summary metrics
+- `src/components/ExpertGuideView.tsx`: Responsive minmax grids (280px) and wrapped switcher pills
+- Modals (`ApplyLeaveModal`, `SettingsModal`, `EmailDraftModal`, `PrintableLeaveForm`): Stacked form fields with `.form-grid-2`, flex-wrapped action buttons, responsive signature blocks
 
 ## Decisions made
 
@@ -46,26 +31,20 @@ Last updated: 2026-09-04 04:58
 - **Email signature**: Name + Designation + Company — Employee ID বাদ
 - **Analytics**: Selected year only, pure SVG (no Recharts)
 - **Charts**: no external chart library
-
-## Problems solved
-
-- `initializeDatabase()` duplicate leave type bug → full cleanup logic দিয়ে ঠিক করা
-- `settingsTable` type `any` ছিল → `UserSettings` typed করা
-- `getReturnDateText()` holiday skip করত না → holidays param যোগ
-- Email greeting hardcoded ছিল → dynamic `managerName` থেকে
+- **Mobile Navigation**: Horizontal scrollable tab bar with touch momentum
+- **Mobile History Table**: Native card view on `<=768px` instead of awkward 6-column horizontal scroll
+- **Mobile Calendar**: Dot indicators for leaves & holidays on `<=768px` with tap popover
 
 ## Current state
 
 - ✅ `npm run dev` চলছে localhost:3000
-- ✅ Last known good build: exit code 0 (আগের build)
-- ✅ 5 tabs: Dashboard, Calendar, History, Analytics, Expert Guide
-- ✅ Leave apply → reason suggestions toggle → chip click → auto-fill
-- ✅ Expiry warning badge: Oct থেকে BalanceCards-এ দেখাবে
-- ⚠️ `git commit && git push` এই সেশনে করা হয়নি — পরের সেশনে করতে হবে
+- ✅ Production build verified: `npm run build` exited with code 0
+- ✅ Full mobile responsive layout across all 5 tabs and 4 modal dialogs
+- ⚠️ `git commit && git push` করা বাকি
 
 ## Next session starts with
 
-`git add -A && git commit -m "feat: analytics, expiry warnings, reason suggestions, email fixes" && git push origin main`
+`git add -A && git commit -m "feat: full mobile responsive layout, touch-friendly navigation, mobile card history view, and compact calendar dots" && git push origin main`
 তারপর নতুন feature request অনুযায়ী কাজ শুরু।
 
 ## Open questions

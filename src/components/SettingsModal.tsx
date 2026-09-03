@@ -195,12 +195,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 1: Profile & Emails */}
           {activeTab === 'profile' && (
             <div>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1rem',
-                marginBottom: '1rem'
-              }}>
+              <div className="form-grid-2" style={{ marginBottom: '1rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Your Name</label>
                   <input
@@ -223,12 +218,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1rem',
-                marginBottom: '1rem'
-              }}>
+              <div className="form-grid-2" style={{ marginBottom: '1rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Designation</label>
                   <input
@@ -267,11 +257,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <h4 style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
                   Email Recipients for Auto-Drafts
                 </h4>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '1rem'
-                }}>
+                <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Manager Name</label>
                     <input
@@ -384,11 +370,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 borderTop: '1px dashed var(--border-subtle)'
               }}>
                 <label className="form-label">Annual Leave Quota Allocation (Days per year)</label>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '1rem'
-                }}>
+                <div className="form-grid-2">
                   {leaveTypes.map((lt) => (
                     <div key={lt.id} className="form-group" style={{ marginBottom: '0.75rem' }}>
                       <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -429,7 +411,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <input
                   type="date"
                   className="form-input"
-                  style={{ width: '150px' }}
+                  style={{ flex: '1 1 130px', minWidth: '120px' }}
                   value={newHolidayDate}
                   onChange={(e) => setNewHolidayDate(e.target.value)}
                 />
@@ -437,7 +419,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   type="text"
                   placeholder="Holiday Name (e.g. Eid-ul-Fitr)"
                   className="form-input"
-                  style={{ flex: 1 }}
+                  style={{ flex: '2 1 160px', minWidth: '140px' }}
                   value={newHolidayName}
                   onChange={(e) => setNewHolidayName(e.target.value)}
                 />
@@ -445,6 +427,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   type="button"
                   onClick={handleAddHoliday}
                   className="btn btn-secondary btn-sm"
+                  style={{ flexShrink: 0 }}
                   disabled={!newHolidayDate || !newHolidayName.trim()}
                 >
                   <Plus size={14} />

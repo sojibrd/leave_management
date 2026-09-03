@@ -394,12 +394,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
           </div>
 
           {/* Date Picker Range */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isHalfDay ? '1fr 1fr' : '1fr 1fr',
-            gap: '1rem',
-            marginBottom: '1.25rem'
-          }}>
+          <div className="form-grid-2" style={{ marginBottom: '1.25rem' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">{isHalfDay ? 'Leave Date' : 'Start Date'}</label>
               <input
@@ -628,12 +623,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
           </div>
 
           {/* Handover / Backup Colleague */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '1rem',
-            marginBottom: '1.25rem'
-          }}>
+          <div className="form-grid-2" style={{ marginBottom: '1.25rem' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Backup / Handover Person</label>
               <input
@@ -709,6 +699,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
+            flexWrap: 'wrap',
             gap: '0.75rem',
             paddingTop: '1rem',
             borderTop: '1px solid var(--border-subtle)'

@@ -179,7 +179,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       }}>
         {/* Leading empty cells */}
         {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-          <div key={`empty-${i}`} style={{ minHeight: '80px', borderRadius: 'var(--radius-md)', opacity: 0.2 }} />
+          <div key={`empty-${i}`} className="calendar-grid-cell" style={{ opacity: 0.15 }} />
         ))}
 
         {/* Days of month */}
@@ -205,21 +205,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   setActiveDateInfo({ dateStr, holiday, leaves: dayLeaves });
                 }
               }}
+              className="calendar-grid-cell"
               style={{
-                minHeight: '84px',
-                padding: '0.4rem 0.5rem',
-                borderRadius: 'var(--radius-md)',
                 backgroundColor: isWeekend ? 'var(--bg-surface-subtle)' : 'var(--bg-surface)',
                 border: isCurrentToday
                   ? '2px solid var(--primary)'
                   : '1px solid var(--border-subtle)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
                 cursor: (dayLeaves.length > 0 || holiday) ? 'pointer' : 'default',
-                transition: 'all 0.15s',
-                boxShadow: isCurrentToday ? '0 0 10px var(--primary-glow)' : 'none',
-                position: 'relative'
+                boxShadow: isCurrentToday ? '0 0 10px var(--primary-glow)' : 'none'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -238,8 +231,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 )}
               </div>
 
-              {/* Badges container inside cell */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
+              {/* Desktop view: Badges container with full text labels */}
+              <div className="calendar-cell-pills">
                 {holiday && (
                   <div
                     title={holiday.name}
@@ -281,6 +274,35 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     <span>{l.leaveTypeCode}</span>
                     {l.isHalfDay && <span style={{ opacity: 0.8 }}>(0.5)</span>}
                   </div>
+                ))}
+              </div>
+
+              {/* Mobile view: Minimal clean indicator dots */}
+              <div className="calendar-cell-dots">
+                {holiday && (
+                  <span
+                    title={`Holiday: ${holiday.name}`}
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--accent-purple)',
+                      display: 'inline-block'
+                    }}
+                  />
+                )}
+                {dayLeaves.map((l, i) => (
+                  <span
+                    key={`${l.id}-${i}`}
+                    title={`${l.leaveTypeName} (${l.status})`}
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: l.status === 'approved' ? 'var(--accent-emerald)' : 'var(--accent-amber)',
+                      display: 'inline-block'
+                    }}
+                  />
                 ))}
               </div>
             </div>

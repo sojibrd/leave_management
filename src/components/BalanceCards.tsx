@@ -68,7 +68,7 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
       {/* Grid of Leave Type Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
         gap: '1.25rem'
       }}>
         {balances.map((summary) => {

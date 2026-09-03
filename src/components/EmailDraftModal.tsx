@@ -175,7 +175,7 @@ export const EmailDraftModal: React.FC<EmailDraftModalProps> = ({
               <span>Print Form / Save PDF</span>
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={onClose}

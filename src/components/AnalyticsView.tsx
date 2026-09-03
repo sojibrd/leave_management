@@ -105,7 +105,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       </div>
 
       {/* Top Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
         {[
           { label: 'Total Quota', value: totalQuota, unit: 'days', icon: <Calendar size={18} />, color: 'var(--primary)', bg: 'var(--primary-subtle)' },
           { label: 'Days Used', value: totalDaysUsed, unit: 'days', icon: <TrendingUp size={18} />, color: 'var(--accent-emerald)', bg: 'rgba(16,185,129,0.1)' },
@@ -114,23 +114,23 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           { label: 'Rejected', value: totalRejected, unit: 'days', icon: <XCircle size={18} />, color: 'var(--accent-rose)', bg: 'rgba(239,68,68,0.1)' },
           { label: 'Remaining', value: totalRemaining, unit: 'days', icon: <BarChart2 size={18} />, color: 'var(--primary)', bg: 'var(--primary-subtle)' },
         ].map((card) => (
-          <div key={card.label} className="glass-card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div key={card.label} className="glass-card" style={{ padding: '0.875rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-sm)', backgroundColor: card.bg, color: card.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {card.icon}
               </div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>{card.label}</span>
             </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: card.color, lineHeight: 1 }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: card.color, lineHeight: 1 }}>
               {card.value}
-              <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.25rem' }}>{card.unit}</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: '0.25rem' }}>{card.unit}</span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Main Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '1.5rem' }}>
+      <div className="responsive-analytics-charts">
 
         {/* Monthly Bar Chart */}
         <div className="glass-card" style={{ padding: '1.5rem' }}>

@@ -121,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
           title="Backup your leaves and settings to JSON"
         >
           <Download size={15} />
-          <span>Backup</span>
+          <span className="hide-on-mobile">Backup</span>
         </button>
 
         {/* Import JSON */}
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
           title="Restore leaves data from JSON backup"
         >
           <Upload size={15} />
-          <span>Restore</span>
+          <span className="hide-on-mobile">Restore</span>
         </button>
 
         {/* Expert Guide */}
@@ -151,7 +151,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Master Leave Strategy & Playbook"
           >
             <Compass size={15} color="var(--primary)" />
-            <span>Guide</span>
+            <span className="hide-on-mobile">Guide</span>
           </button>
         )}
 
@@ -163,7 +163,7 @@ export const Header: React.FC<HeaderProps> = ({
           title="Profile & Office Settings"
         >
           <Settings size={15} />
-          <span>Settings</span>
+          <span className="hide-on-mobile">Settings</span>
         </button>
 
         {/* Theme Toggle */}

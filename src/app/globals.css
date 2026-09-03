@@ -366,6 +366,187 @@ html, body {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* ==========================================================================
+   Responsive Utilities & Layout Components
+   ========================================================================== */
+
+/* Horizontally Scrollable Tabs for Mobile Navigation */
+.tabs-scroll-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.tabs-scroll-container::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.tab-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Main Dashboard 2-Column Responsive Grid */
+.responsive-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1.5rem;
+}
+
+/* Responsive 2-Column Form Fields */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Responsive Analytics Chart Grids */
+.responsive-analytics-charts {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.5rem;
+}
+
+.responsive-analytics-insights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Responsive Table vs Card views */
+.desktop-table-view {
+  display: block;
+}
+
+.mobile-cards-view {
+  display: none;
+}
+
+/* Responsive Calendar Container */
+.calendar-grid-cell {
+  min-height: 84px;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.calendar-cell-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.calendar-cell-dots {
+  display: none;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Mobile Media Queries (<= 768px) */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 0.875rem 0.75rem 3.5rem 0.75rem;
+  }
+
+  .responsive-dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .responsive-analytics-charts,
+  .responsive-analytics-insights {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+  }
+
+  .desktop-table-view {
+    display: none;
+  }
+
+  .mobile-cards-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end; /* Mobile bottom sheet style or clean bottom-aligned card */
+  }
+
+  .modal-content {
+    max-height: 94vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin-bottom: 0;
+  }
+
+  /* Compact calendar cells on small screens */
+  .calendar-grid-cell {
+    min-height: 50px;
+    padding: 0.25rem 0.2rem;
+  }
+
+  .calendar-cell-pills {
+    display: none;
+  }
+
+  .calendar-cell-dots {
+    display: flex;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
+}
+
+/* Printable Leave Form Responsive Preview */
+.printable-content {
+  padding: 2.5rem 3rem;
+}
+
+.printable-signatures {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .printable-content {
+    padding: 1.25rem 1rem !important;
+  }
+  .printable-signatures {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
 /* Print Styles */
 @media print {
   body {
@@ -388,3 +569,5 @@ html, body {
 .print-only {
   display: none;
 }
+
+
