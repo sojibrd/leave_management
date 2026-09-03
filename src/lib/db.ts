@@ -89,10 +89,31 @@ export const db = new LeaveDatabase();
 export async function initializeDatabase(): Promise<void> {
   if (typeof window === 'undefined') return;
 
-  const countTypes = await db.leaveTypes.count();
-  if (countTypes === 0) {
-    for (const lt of DEFAULT_LEAVE_TYPES) {
-      await db.leaveTypes.add(lt as LeaveType);
+  // Cleanup any duplicates if strict mode or past runs created them
+  const existingList = await db.leaveTypes.toArray();
+  const seenCodes = new Set<string>();
+  const duplicateIds: number[] = [];
+
+  for (const item of existingList) {
+    if (seenCodes.has(item.code)) {
+      if (item.id) duplicateIds.push(item.id);
+    } else {
+      seenCodes.add(item.code);
+    }
+  }
+
+  if (duplicateIds.length > 0) {
+    await db.leaveTypes.bulkDelete(duplicateIds);
+  }
+
+  // Seed missing leave types
+  for (const lt of DEFAULT_LEAVE_TYPES) {
+    if (!seenCodes.has(lt.code)) {
+      const exists = await db.leaveTypes.where('code').equals(lt.code).first();
+      if (!exists) {
+        await db.leaveTypes.add(lt as LeaveType);
+        seenCodes.add(lt.code);
+      }
     }
   }
 

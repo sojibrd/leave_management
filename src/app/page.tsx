@@ -118,8 +118,17 @@ export default function LeaveManagementDashboard() {
       // Sort leaves by date descending
       allLeaves.sort((a, b) => (b.startDate > a.startDate ? 1 : -1));
 
+      // Deduplicate leave types by code
+      const uniqueTypesMap = new Map<string, LeaveType>();
+      for (const t of allTypes) {
+        if (!uniqueTypesMap.has(t.code)) {
+          uniqueTypesMap.set(t.code, t);
+        }
+      }
+      const uniqueTypes = Array.from(uniqueTypesMap.values());
+
       setSettings(userSettings);
-      setLeaveTypes(allTypes);
+      setLeaveTypes(uniqueTypes);
       setLeaves(allLeaves);
     } catch (err) {
       console.error('Failed to load database:', err);

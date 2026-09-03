@@ -36,14 +36,25 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  // Deduplicate leave types by code to prevent double-render
+  const uniqueLeaveTypes = useMemo(() => {
+    const map = new Map<string, LeaveType>();
+    for (const lt of leaveTypes) {
+      if (!map.has(lt.code)) {
+        map.set(lt.code, lt);
+      }
+    }
+    return Array.from(map.values());
+  }, [leaveTypes]);
+
   // Set default selected type
   useEffect(() => {
     if (preselectedType?.id) {
       setSelectedTypeId(preselectedType.id);
-    } else if (leaveTypes.length > 0 && !selectedTypeId) {
-      setSelectedTypeId(leaveTypes[0].id || 0);
+    } else if (uniqueLeaveTypes.length > 0 && !selectedTypeId) {
+      setSelectedTypeId(uniqueLeaveTypes[0].id || 0);
     }
-  }, [preselectedType, leaveTypes, selectedTypeId]);
+  }, [preselectedType, uniqueLeaveTypes, selectedTypeId]);
 
   // If start date is after end date, automatically sync end date to start date
   const handleStartDateChange = (val: string) => {
@@ -240,7 +251,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
               gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
               gap: '0.5rem'
             }}>
-              {leaveTypes.map((type) => {
+              {uniqueLeaveTypes.map((type) => {
                 const isSelected = type.id === selectedTypeId;
                 return (
                   <button
