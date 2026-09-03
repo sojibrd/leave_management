@@ -1,0 +1,423 @@
+'use client';
+
+import React, { useEffect, useState, useMemo } from 'react';
+import { LeaveRequest, LeaveType, LeaveStatus, UserSettings } from '../types/leave';
+import {
+  db,
+  initializeDatabase,
+  getSettings,
+  saveSettings,
+  exportDatabaseToJson,
+  importDatabaseFromJson,
+  DEFAULT_SETTINGS,
+  DEFAULT_LEAVE_TYPES
+} from '../lib/db';
+import { calculateBalances } from '../lib/calculator';
+import { Header } from '../components/Header';
+import { BalanceCards } from '../components/BalanceCards';
+import { CalendarView } from '../components/CalendarView';
+import { LeaveHistoryTable } from '../components/LeaveHistoryTable';
+import { ApplyLeaveModal } from '../components/ApplyLeaveModal';
+import { EmailDraftModal } from '../components/EmailDraftModal';
+import { PrintableLeaveForm } from '../components/PrintableLeaveForm';
+import { SettingsModal } from '../components/SettingsModal';
+import { CheckCircle, AlertTriangle, Info, CalendarDays, History, Sliders } from 'lucide-react';
+
+export default function LeaveManagementDashboard() {
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
+  const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
+  const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'calendar' | 'history'>('dashboard');
+
+  // Modals state
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [preselectedType, setPreselectedType] = useState<LeaveType | null>(null);
+
+  const [isEmailDraftOpen, setIsEmailDraftOpen] = useState(false);
+  const [activeLeaveForDraft, setActiveLeaveForDraft] = useState<LeaveRequest | null>(null);
+
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [activeLeaveForPrint, setActiveLeaveForPrint] = useState<LeaveRequest | null>(null);
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Toast notification
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Sync theme
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('leave_master_theme', nextTheme);
+  };
+
+  // Seed sample records if database has 0 leaves on first open
+  const seedDemoLeavesIfEmpty = async () => {
+    const count = await db.leaves.count();
+    if (count === 0) {
+      const types = await db.leaveTypes.toArray();
+      const cl = types.find((t) => t.code === 'CL') || types[0];
+      const sl = types.find((t) => t.code === 'SL') || types[1];
+
+      const currentYearStr = String(new Date().getFullYear());
+
+      // Add 2 sample records
+      await db.leaves.add({
+        leaveTypeId: cl.id!,
+        leaveTypeName: cl.name,
+        leaveTypeCode: cl.code,
+        startDate: `${currentYearStr}-02-15`,
+        endDate: `${currentYearStr}-02-16`,
+        isHalfDay: false,
+        totalDays: 2,
+        reason: 'Attending sibling wedding ceremony in hometown',
+        backupPerson: 'Rafiqul Islam',
+        backupContact: 'rafiq@company.com',
+        status: 'approved',
+        appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString()
+      });
+
+      await db.leaves.add({
+        leaveTypeId: sl.id!,
+        leaveTypeName: sl.name,
+        leaveTypeCode: sl.code,
+        startDate: `${currentYearStr}-03-10`,
+        endDate: `${currentYearStr}-03-10`,
+        isHalfDay: true,
+        halfDayPeriod: 'second-half',
+        totalDays: 0.5,
+        reason: 'Dental checkup and routine consultation',
+        backupPerson: 'Tanvir Ahmed',
+        status: 'approved',
+        appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString()
+      });
+    }
+  };
+
+  // Load all data
+  const loadData = async () => {
+    try {
+      await initializeDatabase();
+      await seedDemoLeavesIfEmpty();
+
+      const userSettings = await getSettings();
+      const allTypes = await db.leaveTypes.toArray();
+      const allLeaves = await db.leaves.toArray();
+
+      // Sort leaves by date descending
+      allLeaves.sort((a, b) => (b.startDate > a.startDate ? 1 : -1));
+
+      setSettings(userSettings);
+      setLeaveTypes(allTypes);
+      setLeaves(allLeaves);
+    } catch (err) {
+      console.error('Failed to load database:', err);
+      showToast('Error accessing IndexedDB storage.', 'error');
+    }
+  };
+
+  useEffect(() => {
+    setMounted(true);
+    const savedTheme = (localStorage.getItem('leave_master_theme') as 'light' | 'dark') || 'dark';
+    setTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    loadData();
+  }, []);
+
+  // Compute live balances
+  const balances = useMemo(() => {
+    return calculateBalances(leaveTypes, leaves, selectedYear);
+  }, [leaveTypes, leaves, selectedYear]);
+
+  // Leave Actions
+  const handleApplyForType = (type: LeaveType) => {
+    setPreselectedType(type);
+    setIsApplyModalOpen(true);
+  };
+
+  const handleOpenNewLeaveModal = () => {
+    setPreselectedType(null);
+    setIsApplyModalOpen(true);
+  };
+
+  const handleSubmitLeave = async (leaveData: Omit<LeaveRequest, 'id'>) => {
+    const id = await db.leaves.add(leaveData as LeaveRequest);
+    const created: LeaveRequest = { ...leaveData, id: Number(id) };
+
+    // Refresh state
+    const allLeaves = await db.leaves.toArray();
+    allLeaves.sort((a, b) => (b.startDate > a.startDate ? 1 : -1));
+    setLeaves(allLeaves);
+
+    showToast('Leave application submitted & logged successfully!', 'success');
+
+    // Automatically prompt official email draft modal
+    setActiveLeaveForDraft(created);
+    setIsEmailDraftOpen(true);
+
+    return created;
+  };
+
+  const handleUpdateStatus = async (id: number, newStatus: LeaveStatus) => {
+    await db.leaves.update(id, {
+      status: newStatus,
+      updatedAt: new Date().toISOString()
+    });
+
+    const allLeaves = await db.leaves.toArray();
+    allLeaves.sort((a, b) => (b.startDate > a.startDate ? 1 : -1));
+    setLeaves(allLeaves);
+
+    showToast(`Leave status updated to "${newStatus}".`, 'info');
+  };
+
+  const handleDeleteLeave = async (id: number) => {
+    await db.leaves.delete(id);
+    const allLeaves = await db.leaves.toArray();
+    allLeaves.sort((a, b) => (b.startDate > a.startDate ? 1 : -1));
+    setLeaves(allLeaves);
+    showToast('Leave record removed.', 'info');
+  };
+
+  const handleSaveSettings = async (newSettings: UserSettings) => {
+    await saveSettings(newSettings);
+    setSettings(newSettings);
+    showToast('Settings saved successfully.', 'success');
+  };
+
+  const handleUpdateLeaveTypeQuota = async (typeId: number, newQuota: number) => {
+    await db.leaveTypes.update(typeId, { totalQuota: newQuota });
+    const allTypes = await db.leaveTypes.toArray();
+    setLeaveTypes(allTypes);
+  };
+
+  const handleExportJson = async () => {
+    const jsonStr = await exportDatabaseToJson();
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leave-master-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Complete backup file downloaded.', 'success');
+  };
+
+  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const content = reader.result as string;
+      const res = await importDatabaseFromJson(content);
+      if (res.success) {
+        await loadData();
+        showToast('Data restored from JSON backup!', 'success');
+      } else {
+        showToast(res.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleResetDemoData = async () => {
+    await db.leaves.clear();
+    await db.leaveTypes.clear();
+    for (const lt of DEFAULT_LEAVE_TYPES) {
+      await db.leaveTypes.add(lt as LeaveType);
+    }
+    await saveSettings(DEFAULT_SETTINGS);
+    await seedDemoLeavesIfEmpty();
+    await loadData();
+    showToast('Database reset to defaults.', 'info');
+  };
+
+  const handleViewEmailDraft = (leave: LeaveRequest) => {
+    setActiveLeaveForDraft(leave);
+    setIsEmailDraftOpen(true);
+  };
+
+  const handleOpenPrintView = (leave: LeaveRequest) => {
+    setActiveLeaveForPrint(leave);
+    setIsPrintModalOpen(true);
+  };
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <div className="app-container">
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.625rem',
+          backgroundColor: toast.type === 'success' ? '#065f46' : toast.type === 'error' ? '#9f1239' : '#1e293b',
+          color: '#ffffff',
+          padding: '0.75rem 1.25rem',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-xl)',
+          fontSize: '0.875rem',
+          fontWeight: 600,
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          {toast.type === 'success' && <CheckCircle size={18} color="#34d399" />}
+          {toast.type === 'error' && <AlertTriangle size={18} color="#f87171" />}
+          {toast.type === 'info' && <Info size={18} color="#60a5fa" />}
+          <span>{toast.message}</span>
+        </div>
+      )}
+
+      {/* Navigation & Header */}
+      <Header
+        settings={settings}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onExportData={handleExportJson}
+        onImportData={handleImportJson}
+        onYearChange={setSelectedYear}
+        selectedYear={selectedYear}
+      />
+
+      {/* Main Tabs Navigation */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        marginBottom: '1.75rem',
+        borderBottom: '1px solid var(--border-subtle)',
+        paddingBottom: '0.75rem'
+      }}>
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className={`btn ${activeTab === 'dashboard' ? 'btn-primary' : 'btn-outline'}`}
+        >
+          <Sliders size={16} />
+          <span>Dashboard & Balances</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('calendar')}
+          className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
+        >
+          <CalendarDays size={16} />
+          <span>Leave Calendar</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('history')}
+          className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
+        >
+          <History size={16} />
+          <span>Application History ({leaves.length})</span>
+        </button>
+      </div>
+
+      {/* TAB 1: Dashboard View */}
+      {activeTab === 'dashboard' && (
+        <>
+          <BalanceCards
+            balances={balances}
+            onApplyForType={handleApplyForType}
+            onOpenNewLeaveModal={handleOpenNewLeaveModal}
+          />
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1.2fr 0.8fr',
+            gap: '1.5rem'
+          }}>
+            <CalendarView
+              leaves={leaves}
+              settings={settings}
+              selectedYear={selectedYear}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <LeaveHistoryTable
+                leaves={leaves.slice(0, 5)}
+                onUpdateStatus={handleUpdateStatus}
+                onDeleteLeave={handleDeleteLeave}
+                onViewEmailDraft={handleViewEmailDraft}
+                onPrintForm={handleOpenPrintView}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* TAB 2: Full Calendar View */}
+      {activeTab === 'calendar' && (
+        <CalendarView
+          leaves={leaves}
+          settings={settings}
+          selectedYear={selectedYear}
+        />
+      )}
+
+      {/* TAB 3: Full History View */}
+      {activeTab === 'history' && (
+        <LeaveHistoryTable
+          leaves={leaves}
+          onUpdateStatus={handleUpdateStatus}
+          onDeleteLeave={handleDeleteLeave}
+          onViewEmailDraft={handleViewEmailDraft}
+          onPrintForm={handleOpenPrintView}
+        />
+      )}
+
+      {/* Modals */}
+      <ApplyLeaveModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        leaveTypes={leaveTypes}
+        preselectedType={preselectedType}
+        settings={settings}
+        onSubmit={handleSubmitLeave}
+      />
+
+      <EmailDraftModal
+        isOpen={isEmailDraftOpen}
+        onClose={() => setIsEmailDraftOpen(false)}
+        leave={activeLeaveForDraft}
+        settings={settings}
+        onOpenPrintView={handleOpenPrintView}
+      />
+
+      <PrintableLeaveForm
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        leave={activeLeaveForPrint}
+        settings={settings}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={settings}
+        leaveTypes={leaveTypes}
+        onSaveSettings={handleSaveSettings}
+        onUpdateLeaveTypeQuota={handleUpdateLeaveTypeQuota}
+        onResetDemoData={handleResetDemoData}
+      />
+    </div>
+  );
+}
