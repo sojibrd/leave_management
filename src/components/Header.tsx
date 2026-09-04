@@ -2,12 +2,10 @@
 
 import React from 'react';
 import { UserSettings } from '../types/leave';
-import { Calendar, Download, Upload, Moon, Sun, Settings, UserCheck, Compass } from 'lucide-react';
+import { Calendar, Download, Upload, Settings, UserCheck, Compass } from 'lucide-react';
 
 interface HeaderProps {
   settings: UserSettings;
-  theme: 'light' | 'dark' | 'control-room';
-  onToggleTheme: () => void;
   onOpenSettings: () => void;
   onExportData: () => void;
   onImportData: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -18,8 +16,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   settings,
-  theme,
-  onToggleTheme,
   onOpenSettings,
   onExportData,
   onImportData,
@@ -52,13 +48,13 @@ export const Header: React.FC<HeaderProps> = ({
           width: '46px',
           height: '46px',
           borderRadius: 'var(--radius-md)',
-          background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+          background: 'var(--bg-surface-elevated)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#ffffff',
-          boxShadow: '0 0 15px rgba(14, 165, 233, 0.3)',
-          border: '1px solid rgba(56, 189, 248, 0.25)'
+          color: 'var(--primary)',
+          boxShadow: 'inset 0 1px 0 0 rgba(255, 236, 205, 0.1), 0 2px 0 0 rgba(0, 0, 0, 0.6)',
+          border: '1px solid var(--border-strong)'
         }}>
           <Calendar size={24} />
         </div>
@@ -67,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
               Leave<span className="gradient-text">Master</span>
             </h1>
-            <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: 'rgba(14, 165, 233, 0.12)', color: 'var(--accent-cyan)', border: '1px solid rgba(14, 165, 233, 0.28)' }}>
+            <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: 'var(--primary-subtle)', color: 'var(--primary)', border: '1px solid rgba(255, 176, 32, 0.3)' }}>
               Control Room
             </span>
           </div>
@@ -165,17 +161,6 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Settings size={15} />
           <span className="hide-on-mobile">Settings</span>
-        </button>
-
-        {/* Theme Toggle */}
-        <button
-          id="btn-toggle-theme"
-          onClick={onToggleTheme}
-          className="btn btn-secondary btn-icon-only"
-          aria-label="Toggle theme"
-          title={theme === 'control-room' || theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Control Room Mode'}
-        >
-          {theme === 'control-room' || theme === 'dark' ? <Sun size={17} color="#00f0ff" /> : <Moon size={17} color="#0284c7" />}
         </button>
       </div>
     </header>

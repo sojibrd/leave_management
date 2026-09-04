@@ -424,11 +424,11 @@ export function findOptimalHolidayBridges(
             // Must yield at least 4 total days off and efficiency >= 1.8
             if (totalConsecutiveDaysOff >= 4 && efficiency >= 1.8) {
               const primaryHoliday = allConnectedHolidays[0];
-              const monthName = leaveStartNode.dateObj.toLocaleDateString('bn-BD', { month: 'long' });
+              const monthName = leaveStartNode.dateObj.toLocaleDateString('en-US', { month: 'long' });
 
               const title = allConnectedHolidays.length > 1
-                ? `${allConnectedHolidays.slice(0, 2).join(' ও ')} মেগা-স্প্রিন্ট`
-                : `${primaryHoliday} ব্রিজ (${monthName})`;
+                ? `${allConnectedHolidays.slice(0, 2).join(' & ')} Mega-Sprint`
+                : `${primaryHoliday} Bridge (${monthName})`;
 
               const badgeColor = efficiency >= 3.0
                 ? 'var(--accent-rose)'
@@ -446,15 +446,15 @@ export function findOptimalHolidayBridges(
               breakdown.push({
                 date: formatFriendlyDateRange(precStart.dateStr, precEnd.dateStr),
                 label: precHols.length > 0
-                  ? `${precHols.join(', ')} + উইকেন্ড (${precedingStreak.length} দিন)`
-                  : `সাপ্তাহিক ছুটি (${precedingStreak.length} দিন)`,
+                  ? `${precHols.join(', ')} + Weekend (${precedingStreak.length}d)`
+                  : `Weekend (${precedingStreak.length}d)`,
                 type: precHols.length > 0 ? 'holiday' : 'weekend'
               });
 
               // Leave days
               breakdown.push({
                 date: formatFriendlyDateRange(leaveStartNode.dateStr, leaveEndNode.dateStr),
-                label: `${gapLength} দিন Leave নিন`,
+                label: `Take ${gapLength}d Leave`,
                 type: 'leave'
               });
 
@@ -465,15 +465,15 @@ export function findOptimalHolidayBridges(
               breakdown.push({
                 date: formatFriendlyDateRange(succStart.dateStr, succEnd.dateStr),
                 label: succHols.length > 0
-                  ? `${succHols.join(', ')} + উইকেন্ড (${succeedingStreak.length} দিন)`
-                  : `সাপ্তাহিক ছুটি (${succeedingStreak.length} দিন)`,
+                  ? `${succHols.join(', ')} + Weekend (${succeedingStreak.length}d)`
+                  : `Weekend (${succeedingStreak.length}d)`,
                 type: succHols.length > 0 ? 'holiday' : 'weekend'
               });
 
               rawOpportunities.push({
                 id: `bridge-${leaveStartNode.dateStr}-${leaveEndNode.dateStr}`,
                 title,
-                tag: `🔥 ${gapLength} দিন ছুটি = ${totalConsecutiveDaysOff} দিন অফ`,
+                tag: `🔥 ${gapLength}d leave = ${totalConsecutiveDaysOff}d off`,
                 efficiency,
                 leaveDaysNeeded: gapLength,
                 totalDaysOff: totalConsecutiveDaysOff,
@@ -481,10 +481,10 @@ export function findOptimalHolidayBridges(
                 endDate: leaveEndNode.dateStr,
                 totalOffRangeStart: precStart.dateStr,
                 totalOffRangeEnd: succEnd.dateStr,
-                reason: `${allConnectedHolidays.join(', ')} সংলগ্ন পারিবারিক অবকাশ ও ব্যক্তিগত রিকভারি`,
+                reason: `Family time and personal recovery around ${allConnectedHolidays.join(', ')}`,
                 badgeColor,
                 breakdown,
-                description: `${allConnectedHolidays.join(', ')} এবং সাপ্তাহিক ছুটির সাথে মাত্র ${gapLength} দিনের ছুটি ব্রিজিং করে টানা ${totalConsecutiveDaysOff} দিনের নিরবচ্ছিন্ন ভ্যাকেশন উপভোগ করুন।`,
+                description: `Bridge just ${gapLength} day(s) of leave with ${allConnectedHolidays.join(', ')} and the weekend to enjoy ${totalConsecutiveDaysOff} consecutive days off.`,
                 connectedHolidays: allConnectedHolidays
               });
             }

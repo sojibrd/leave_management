@@ -188,15 +188,15 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
                 const warn = warningMap.get(leaveType.code);
                 if (!warn) return null;
                 const bgColor = warn.urgencyLevel === 'critical'
-                  ? 'rgba(239,68,68,0.12)'
+                  ? 'rgba(224,86,70,0.12)'
                   : warn.urgencyLevel === 'warning'
-                  ? 'rgba(245,158,11,0.12)'
-                  : 'rgba(99,102,241,0.12)';
+                  ? 'rgba(255,176,32,0.12)'
+                  : 'rgba(98,160,221,0.12)';
                 const color = warn.urgencyLevel === 'critical'
                   ? 'var(--accent-rose)'
                   : warn.urgencyLevel === 'warning'
                   ? 'var(--accent-amber)'
-                  : 'var(--primary)';
+                  : 'var(--accent-cyan)';
                 return (
                   <div style={{
                     display: 'flex',
@@ -213,7 +213,7 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
                     animation: warn.urgencyLevel === 'critical' ? 'pulse 2s ease-in-out infinite' : undefined
                   }}>
                     <AlertTriangle size={11} />
-                    <span>{warn.remainingDays}d expire হবে — {warn.daysUntilExpiry} দিন বাকি (Dec 31)</span>
+                    <span>{warn.remainingDays}d will expire — {warn.daysUntilExpiry} days left (Dec 31)</span>
                   </div>
                 );
               })()}

@@ -27,7 +27,6 @@ import { CheckCircle, AlertTriangle, Info, CalendarDays, History, Sliders, Compa
 
 export default function LeaveManagementDashboard() {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<'control-room' | 'light'>('control-room');
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
@@ -53,14 +52,6 @@ export default function LeaveManagementDashboard() {
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
-  };
-
-  // Sync theme
-  const toggleTheme = () => {
-    const nextTheme = theme === 'control-room' ? 'light' : 'control-room';
-    setTheme(nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    localStorage.setItem('leave_master_theme', nextTheme);
   };
 
   // Seed sample records if database has 0 leaves on first open
@@ -144,9 +135,6 @@ export default function LeaveManagementDashboard() {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = (localStorage.getItem('leave_master_theme') as 'control-room' | 'light') || 'control-room';
-    setTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
     loadData();
   }, []);
 
@@ -337,8 +325,6 @@ export default function LeaveManagementDashboard() {
       {/* Navigation & Header */}
       <Header
         settings={settings}
-        theme={theme}
-        onToggleTheme={toggleTheme}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onExportData={handleExportJson}
         onImportData={handleImportJson}

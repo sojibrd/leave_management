@@ -172,7 +172,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                       opacity: isEmpty ? 0.4 : 1,
                       transition: 'height 0.4s ease-out, background-color 0.2s',
                       cursor: d.days > 0 ? 'pointer' : 'default',
-                      boxShadow: !isEmpty ? '0 0 8px rgba(99,102,241,0.3)' : 'none'
+                      boxShadow: !isEmpty ? '0 0 8px rgba(255,176,32,0.3)' : 'none'
                     }}
                   />
 

@@ -1,41 +1,44 @@
 import Dexie, { type EntityTable } from 'dexie';
 import { LeaveRequest, LeaveType, UserSettings, Holiday } from '../types/leave';
 
+/* Category colours match system_design's control-room category-lamp set —
+   distinct signal colours read against the warm chassis without any of them
+   needing to be the accent amber. */
 export const DEFAULT_LEAVE_TYPES: Omit<LeaveType, 'id'>[] = [
   {
     code: 'CL',
     name: 'Casual Leave',
     totalQuota: 10,
-    color: '#3B82F6',
-    bgColor: 'rgba(59, 130, 246, 0.12)',
-    borderColor: 'rgba(59, 130, 246, 0.35)',
+    color: '#62a0dd',
+    bgColor: 'rgba(98, 160, 221, 0.12)',
+    borderColor: 'rgba(98, 160, 221, 0.35)',
     description: 'For unforeseen personal urgent matters, travel, or family duties.'
   },
   {
     code: 'SL',
     name: 'Sick Leave',
     totalQuota: 14,
-    color: '#EF4444',
-    bgColor: 'rgba(239, 68, 68, 0.12)',
-    borderColor: 'rgba(239, 68, 68, 0.35)',
+    color: '#e05646',
+    bgColor: 'rgba(224, 86, 70, 0.12)',
+    borderColor: 'rgba(224, 86, 70, 0.35)',
     description: 'For illness, doctor appointments, or medical recovery.'
   },
   {
     code: 'AL',
     name: 'Annual / Earned Leave',
     totalQuota: 15,
-    color: '#10B981',
-    bgColor: 'rgba(16, 185, 129, 0.12)',
-    borderColor: 'rgba(16, 185, 129, 0.35)',
+    color: '#52c07a',
+    bgColor: 'rgba(82, 192, 122, 0.12)',
+    borderColor: 'rgba(82, 192, 122, 0.35)',
     description: 'Planned vacations, extended breaks, and rest.'
   },
   {
     code: 'CO',
     name: 'Compensatory Leave',
     totalQuota: 2,
-    color: '#8B5CF6',
-    bgColor: 'rgba(139, 92, 246, 0.12)',
-    borderColor: 'rgba(139, 92, 246, 0.35)',
+    color: '#a97ad6',
+    bgColor: 'rgba(169, 122, 214, 0.12)',
+    borderColor: 'rgba(169, 122, 214, 0.35)',
     description: 'Time off in lieu of working weekends or holidays.'
   }
 ];

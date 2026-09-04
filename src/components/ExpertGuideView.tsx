@@ -3,18 +3,18 @@
 import React, { useState, useMemo } from 'react';
 import { UserSettings } from '../types/leave';
 import { findOptimalHolidayBridges, toDateString } from '../lib/calculator';
-import { 
-  Compass, 
-  Sparkles, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Copy, 
-  Check, 
-  Calendar, 
-  ArrowRight, 
-  AlertTriangle, 
-  Flame, 
-  Briefcase, 
+import {
+  Compass,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+  Copy,
+  Check,
+  Calendar,
+  ArrowRight,
+  AlertTriangle,
+  Flame,
+  Briefcase,
   MessageSquare,
   Clock,
   Layers
@@ -27,7 +27,7 @@ interface ExpertGuideViewProps {
   onOpenSettings?: () => void;
 }
 
-export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({ 
+export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({
   onApplyForBridge,
   settings,
   selectedYear = new Date().getFullYear(),
@@ -62,82 +62,82 @@ export const ExpertGuideView: React.FC<ExpertGuideViewProps> = ({
   const edgeCases = [
     {
       icon: <Layers size={20} color="var(--accent-rose)" />,
-      title: '১. তারিখের সংঘাত ও Overlapping Applications',
-      rule: 'একই ক্যালেন্ডার তারিখে মোট ছুটি ১.০ দিনের বেশি হতে পারবে না।',
-      details: 'বিদ্যমান Pending বা Approved ছুটির তারিখের সাথে নতুন আবেদন ওভারল্যাপ করলে সিস্টেম সাথে সাথে ব্লক করে। তবে একই দিনে Morning Half এবং Afternoon Half-এর মতো Complementary Half-Day আবেদন স্বয়ংক্রিয়ভাবে অনুমোদন পায়।'
+      title: '1. Date Conflicts & Overlapping Applications',
+      rule: 'Total leave on the same calendar date cannot exceed 1.0 day.',
+      details: 'A new application that overlaps with an existing Pending or Approved leave date is blocked immediately. Complementary half-day applications on the same date — such as a Morning Half and an Afternoon Half — are auto-approved, since together they still sum to exactly one day.'
     },
     {
       icon: <Calendar size={20} color="var(--primary)" />,
-      title: '২. উইকেন্ড ও সরকারি ছুটির সীমানা সংঘর্ষ',
-      rule: 'ছুটির দিনগুলো কখনোই কোটা ডেডাকশনে অন্তর্ভুক্ত হয় না।',
-      details: 'বৃহস্পতি থেকে রবিবার আবেদন করলে সিস্টেম শুক্রবার ও শনিবার বাদ দিয়ে কেবল ২ কর্মদিবস (বৃহস্পতি ও রবিবার) হিসাব করে।'
+      title: '2. Weekend & Public Holiday Boundary Overlap',
+      rule: 'Off-days never count toward quota deduction.',
+      details: 'Applying from Thursday to Sunday, the system excludes Friday and Saturday and deducts only the 2 working days (Thursday and Sunday).'
     },
     {
       icon: <Clock size={20} color="var(--accent-amber)" />,
-      title: '৩. স্যান্ডউইচ রুল (The Sandwich Rule)',
-      rule: 'টানা ছুটির মাঝখানের উইকেন্ডও ছুটি গণ্য হওয়ার নীতি।',
-      details: 'যেসব প্রতিষ্ঠানে কঠোর Sandwich Rule রয়েছে, সেখানে বৃহস্পতি ও রবিবার ছুটি নিলে মাঝের শুক্র-শনি মিলিয়ে ৪ দিন কর্তন হয়। আমাদের সিস্টেমে উইকেন্ড সবসময় সুরক্ষিত থাকে।'
+      title: '3. The Sandwich Rule',
+      rule: 'The policy of counting the weekend sandwiched between two leave days as leave too.',
+      details: 'Organizations with a strict Sandwich Rule deduct 4 days if you take Thursday and Sunday off, including the Friday-Saturday in between. In our system, the weekend is always protected.'
     },
     {
       icon: <Flame size={20} color="var(--accent-emerald)" />,
-      title: '৪. কোটা শেষ ও LOP (Leave Without Pay)',
-      rule: 'কোটা অতিক্রম করলে স্বয়ংক্রিয় সতর্কতা ও অবৈতনিক লিভ হিসেবে রূপান্তর।',
-      details: 'অবশিষ্ট ব্যালেন্সের চেয়ে বেশি দিন আবেদন করলে সিস্টেম অ্যাম্বার সতর্কতা দেখায় এবং অতিরিক্ত দিনগুলো Unpaid Leave হিসেবে এইচআর প্রক্রিয়াকরণের জন্য প্রস্তুত করে।'
+      title: '4. Quota Exhaustion & LOP (Leave Without Pay)',
+      rule: 'Automatic warning and conversion to unpaid leave when quota is exceeded.',
+      details: 'Applying for more days than the remaining balance triggers an amber warning, and the excess days are marked as Unpaid Leave, ready for HR processing.'
     },
     {
       icon: <Sparkles size={20} color="#8b5cf6" />,
-      title: '৫. বছর পরিবর্তনের সীমানা (Dec 31 - Jan 1 Crossover)',
-      rule: 'স্বয়ংক্রিয় বাৎসরিক পার্টিশনিং (Year Splitting)।',
-      details: 'ডিসেম্বর থেকে জানুয়ারিতে বিস্তৃত ছুটির আবেদনগুলোকে স্বয়ংক্রিয়ভাবে সংশ্লিষ্ট বছরের কোটায় ভাগ করা হয় যাতে Carry-Forward ছাড়া সঠিক কোটা কর্তন নিশ্চিত হয়।'
+      title: '5. Year-Boundary Crossover (Dec 31 - Jan 1)',
+      rule: 'Automatic yearly partitioning (Year Splitting).',
+      details: 'Leave applications spanning December into January are automatically split across each year\'s own quota, ensuring correct deduction with no carry-forward.'
     },
     {
-      icon: <ShieldCheck size={20} color="#06b6d4" />,
-      title: '৬. অ্যাটমিক কোটা রিজার্ভেশন (Atomic Reservation)',
-      rule: 'Available = Total Quota - Approved - Pending।',
-      details: 'Pending থাকা অবস্থাতেই কোটা রিজার্ভ হয়ে যায়, ফলে একই কোটার বিপরীতে একাধিক সমান্তরাল আবেদন সাবমিট করা অসম্ভব।'
+      icon: <ShieldCheck size={20} color="var(--accent-cyan)" />,
+      title: '6. Atomic Quota Reservation',
+      rule: 'Available = Total Quota - Approved - Pending.',
+      details: 'Quota is reserved the moment a leave becomes Pending, making it impossible to submit multiple parallel applications against the same quota.'
     }
   ];
 
   const oooTemplates = [
     {
       id: 'slack-status',
-      title: 'অভ্যন্তরীণ স্ল্যাক / মাইক্রোসফট টিমস স্ট্যাটাস',
-      text: '🌴 OOO: Returning on [তারিখ] | Primary Backup: @[সহকর্মীর নাম] | Emergency: Call mobile'
+      title: 'Internal Slack / Microsoft Teams Status',
+      text: '🌴 OOO: Returning on [date] | Primary Backup: @[colleague name] | Emergency: Call mobile'
     },
     {
       id: 'client-autoresponder',
-      title: 'এক্সটার্নাল ক্লায়েন্টদের জন্য ইমেইল অটো-রেসপন্ডার',
-      text: `Subject: Out of Office: [আপনার নাম] until [ফেরার তারিখ]
+      title: 'Email Auto-Responder for External Clients',
+      text: `Subject: Out of Office: [Your Name] until [Return Date]
 
 Hello,
 
-Thank you for your email. I am currently out of the office on scheduled leave, returning on [ফেরার তারিখ].
+Thank you for your email. I am currently out of the office on scheduled leave, returning on [Return Date].
 
 During this period, I will have limited/no access to email.
 
 For urgent matters regarding:
-- [প্রোজেক্টের নাম]: Please contact [ব্যাকআপ ব্যক্তির নাম] ([backup@company.com])
+- [Project Name]: Please contact [Backup Person's Name] ([backup@company.com])
 - General / Operational inquiries: Please reach out to [team@company.com]
 
 I will respond to your message promptly upon my return.
 
 Best regards,
-[আপনার নাম]
-[আপনার পদবি]`
+[Your Name]
+[Your Designation]`
     },
     {
       id: 'handover-brief',
-      title: 'টিম চ্যানেলে ছুটির হ্যান্ডওভার নোটিশ',
+      title: 'Leave Handover Notice for the Team Channel',
       text: `Hi Team,
 
-আমি [শুরুর তারিখ] থেকে [শেষের তারিখ] পর্যন্ত ছুটিতে থাকব এবং [অফিসে ফেরার তারিখ] অফিসে উপস্থিত হব।
+I will be on leave from [start date] to [end date], and will be back in the office on [return date].
 
-প্রোজেক্ট হ্যান্ডওভার সামারি:
-১. [প্রোজেক্ট A]: সকল চলমান Pull Request মার্জ করা হয়েছে। ক্লায়েন্ট ফলো-আপের দায়িত্ব [সহকর্মীর নাম]-এর কাছে রয়েছে।
-২. [প্রোজেক্ট B]: বর্তমান স্প্রিন্টের কাজ সম্পন্ন। প্রয়োজনীয় গাইডলাইন [ডকুমেন্ট লিংক]-এ দেওয়া আছে।
-৩. ইমার্জেন্সি যোগাযোগ: কেবল P1 প্রোডাকশন ক্রিটিক্যাল সমস্যা ছাড়া মোবাইলে যোগাযোগ না করার অনুরোধ রইল।
+Project handover summary:
+1. [Project A]: All open Pull Requests have been merged. Client follow-up is with [colleague name].
+2. [Project B]: Current sprint work is complete. Required guidelines are in [document link].
+3. Emergency contact: Please avoid contacting me on mobile except for P1 production-critical issues.
 
-ধন্যবাদ!`
+Thanks!`
     }
   ];
 
@@ -145,8 +145,8 @@ Best regards,
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
       {/* Hero Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%)',
-        border: '1px solid rgba(99, 102, 241, 0.25)',
+        background: 'linear-gradient(135deg, rgba(255, 176, 32, 0.12) 0%, rgba(169, 122, 214, 0.12) 100%)',
+        border: '1px solid rgba(255, 176, 32, 0.25)',
         borderRadius: 'var(--radius-lg)',
         padding: '1.75rem',
         display: 'flex',
@@ -159,14 +159,14 @@ Best regards,
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <Compass size={22} color="var(--primary)" />
             <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              মাস্টার রেফারেন্স ও স্ট্র্যাটেজিক প্লেবুক
+              Master Reference & Strategic Playbook
             </span>
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-            দক্ষভাবে ছুটি ব্যবস্থাপনা (Manage Leave Like an Expert)
+            Manage Leave Like an Expert
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            স্মার্ট হলিডে ব্রিজিং, নিবিড় হ্যান্ডওভার প্রোটোকল এবং শক্তিশালী সিস্টেম এজ-কেস সুরক্ষার মাধ্যমে নিজের জন্য সর্বোচ্চ বিশ্রামের সুযোগ নিশ্চিত করুন।
+            Secure maximum rest for yourself with smart holiday bridging, disciplined handover protocols, and robust system edge-case protection.
           </p>
         </div>
 
@@ -186,7 +186,7 @@ Best regards,
             style={{ border: activeSection === 'hacks' ? undefined : 'none' }}
           >
             <Sparkles size={14} />
-            <span>{selectedYear} আপকামিং হ্যাকস ({upcomingHacks.length})</span>
+            <span>{selectedYear} Upcoming Hacks ({upcomingHacks.length})</span>
           </button>
           <button
             onClick={() => setActiveSection('edgecases')}
@@ -194,7 +194,7 @@ Best regards,
             style={{ border: activeSection === 'edgecases' ? undefined : 'none' }}
           >
             <ShieldCheck size={14} />
-            <span>Edge Case ম্যাট্রিক্স</span>
+            <span>Edge Case Matrix</span>
           </button>
           <button
             onClick={() => setActiveSection('handover')}
@@ -202,7 +202,7 @@ Best regards,
             style={{ border: activeSection === 'handover' ? undefined : 'none' }}
           >
             <Briefcase size={14} />
-            <span>হ্যান্ডওভার চেকলিস্ট</span>
+            <span>Handover Checklist</span>
           </button>
           <button
             onClick={() => setActiveSection('ooo')}
@@ -210,7 +210,7 @@ Best regards,
             style={{ border: activeSection === 'ooo' ? undefined : 'none' }}
           >
             <MessageSquare size={14} />
-            <span>OOO টেমপ্লেট</span>
+            <span>OOO Templates</span>
           </button>
         </div>
       </div>
@@ -228,12 +228,12 @@ Best regards,
           }}>
             <div>
               <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-                {showPastHacks ? `সকল ছুটির ব্রিজিং (${selectedYear})` : `আসন্ন ছুটির কৌশলগত ব্রিজিং (${selectedYear})`}
+                {showPastHacks ? `All Holiday Bridges (${selectedYear})` : `Upcoming Strategic Holiday Bridges (${selectedYear})`}
               </h3>
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
                 {showPastHacks
-                  ? `এই বছরের অতীতের ও আসন্ন মিলিয়ে সকল ${allHolidayHacks.length}টি সুযোগ দেখানো হচ্ছে।`
-                  : `আজকের পর থেকে সামনের সেরা ভ্যাকেশন স্প্রিন্টগুলো দেখানো হচ্ছে (অতীতের ছুটিগুলো স্বয়ংক্রিয়ভাবে বাদ দেওয়া হয়েছে)।`}
+                  ? `Showing all ${allHolidayHacks.length} opportunities this year, past and upcoming combined.`
+                  : `Showing the best upcoming vacation sprints from today onward (past holidays are excluded automatically).`}
               </p>
             </div>
 
@@ -242,9 +242,9 @@ Best regards,
                 onClick={() => setShowPastHacks(!showPastHacks)}
                 className="btn btn-secondary btn-sm"
                 style={{ fontSize: '0.75rem' }}
-                title="অতীতের সুযোগগুলো দেখা বা লুকানোর টগল"
+                title="Toggle showing or hiding past opportunities"
               >
-                <span>{showPastHacks ? 'শুধু আপকামিং দেখুন' : `অতীতের ${pastHacksCount}টি দেখুন`}</span>
+                <span>{showPastHacks ? 'Show upcoming only' : `Show ${pastHacksCount} past`}</span>
               </button>
             )}
           </div>
@@ -263,22 +263,22 @@ Best regards,
             }}>
               <Calendar size={36} color="var(--primary)" />
               <h4 style={{ fontSize: '1.05rem', fontWeight: 700 }}>
-                {selectedYear} সালের জন্য আর কোনো আসন্ন লিভ-ব্রিজিং সুযোগ বাকি নেই
+                No upcoming leave-bridging opportunities left for {selectedYear}
               </h4>
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.5 }}>
                 {pastHacksCount > 0
-                  ? `এই বছরের পূর্ববর্তী ${pastHacksCount}টি সুযোগ ইতিমধ্যে পার হয়ে গেছে। সামনের দিনগুলোর জন্য সেটিংস থেকে নতুন কাস্টম ছুটি যোগ করতে পারেন।`
-                  : 'আপনি সেটিংস থেকে নতুন সরকারি বা কাস্টম ছুটি যোগ করলে সিস্টেম স্বয়ংক্রিয়ভাবে এখানে সেরা ছুটির ব্রিজিং সুযোগগুলো তৈরি করে দেবে।'}
+                  ? `${pastHacksCount} opportunities earlier this year have already passed. You can add new custom holidays from Settings for upcoming dates.`
+                  : 'Add a new public or custom holiday from Settings and the system will automatically generate the best holiday-bridging opportunities here.'}
               </p>
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {pastHacksCount > 0 && !showPastHacks && (
                   <button onClick={() => setShowPastHacks(true)} className="btn btn-secondary btn-sm">
-                    <span>অতীতের {pastHacksCount}টি দেখুন</span>
+                    <span>Show {pastHacksCount} past</span>
                   </button>
                 )}
                 {onOpenSettings && (
                   <button onClick={onOpenSettings} className="btn btn-primary btn-sm">
-                    <span>সেটিংস থেকে ছুটি যোগ করুন</span>
+                    <span>Add holidays from Settings</span>
                   </button>
                 )}
               </div>
@@ -335,12 +335,12 @@ Best regards,
                           padding: '0.4rem 0.6rem',
                           borderRadius: 'var(--radius-sm)',
                           backgroundColor: b.type === 'leave'
-                            ? 'rgba(99, 102, 241, 0.1)'
+                            ? 'rgba(169, 122, 214, 0.1)'
                             : b.type === 'holiday'
-                              ? 'rgba(245, 158, 11, 0.1)'
+                              ? 'rgba(255, 176, 32, 0.1)'
                               : 'var(--bg-surface-subtle)',
                           borderLeft: `3px solid ${
-                            b.type === 'leave' ? 'var(--primary)' : b.type === 'holiday' ? 'var(--accent-amber)' : 'var(--text-muted)'
+                            b.type === 'leave' ? 'var(--accent-purple)' : b.type === 'holiday' ? 'var(--accent-amber)' : 'var(--text-muted)'
                           }`
                         }}
                       >
@@ -359,7 +359,7 @@ Best regards,
                     className="btn btn-primary btn-sm"
                     style={{ width: '100%', justifyContent: 'center' }}
                   >
-                    <span>এই স্প্রিন্টের জন্য আবেদন করুন</span>
+                    <span>Apply for this sprint</span>
                     <ArrowRight size={14} />
                   </button>
                 )}
@@ -375,10 +375,10 @@ Best regards,
         <div>
           <div style={{ marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              সিস্টেম Edge Case ম্যাট্রিক্স ও বিজনেস রুলস
+              System Edge Case Matrix & Business Rules
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              আমাদের লিভ ক্যালকুলেশন ইঞ্জিন কীভাবে নির্ভুলতা ও ডুপ্লিকেট প্রতিরোধ নিশ্চিত করে।
+              How our leave calculation engine ensures accuracy and prevents duplicates.
             </p>
           </div>
 
@@ -420,7 +420,7 @@ Best regards,
                   borderRadius: 'var(--radius-sm)',
                   color: 'var(--primary)'
                 }}>
-                  রুল: {ec.rule}
+                  Rule: {ec.rule}
                 </div>
 
                 <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -437,10 +437,10 @@ Best regards,
         <div className="card" style={{ padding: '1.75rem' }}>
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              নিখুঁত হ্যান্ডওভার চেকলিস্ট (Ironclad Handover)
+              Ironclad Handover Checklist
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              ছুটিতে যাওয়ার পূর্বে এই ধাপগুলো নিশ্চিত করুন যাতে আপনার অনুপস্থিতিতেও কাজ নিরবচ্ছিন্ন থাকে।
+              Confirm these steps before going on leave so work stays uninterrupted in your absence.
             </p>
           </div>
 
@@ -452,20 +452,20 @@ Best regards,
               border: '1px solid var(--border-subtle)'
             }}>
               <h4 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--accent-emerald)' }}>
-                ১. প্রস্তুতি ও ব্রিফিং (৩-৫ দিন পূর্বে)
+                1. Preparation & Briefing (3-5 days before)
               </h4>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-emerald)" />
-                  <span>প্রাইমারি ও সেকেন্ডারি ব্যাকআপ সহকর্মীদের সম্পূর্ণ কাজের ব্রিফিং দিন।</span>
+                  <span>Give the primary and secondary backup colleagues a complete work briefing.</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-emerald)" />
-                  <span>স্প্রিন্ট লিডকে অনুপস্থিতির কারণে ক্যাপাসিটি রিডাকশন সম্পর্কে জানান।</span>
+                  <span>Inform the sprint lead about the capacity reduction due to your absence.</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-emerald)" />
-                  <span>আসন্ন মিটিংগুলো রিসিডিউল করুন অথবা সহকর্মীদের প্রতিনিধি হিসেবে পাঠান।</span>
+                  <span>Reschedule upcoming meetings or send a colleague as your delegate.</span>
                 </li>
               </ul>
             </div>
@@ -477,20 +477,20 @@ Best regards,
               border: '1px solid var(--border-subtle)'
             }}>
               <h4 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--primary)' }}>
-                ২. বাস্তবায়ন ও পার্কিং (১ দিন পূর্বে)
+                2. Execution & Parking (1 day before)
               </h4>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--primary)" />
-                  <span>চলমান সব Pull Request মার্জ করুন অথবা কোড ক্লিন অবস্থায় পার্ক করুন।</span>
+                  <span>Merge all open Pull Requests or park code in a clean state.</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--primary)" />
-                  <span>স্ল্যাক বা টিমস চ্যানেলে লিখিত হ্যান্ডওভার নোট পোস্ট করুন।</span>
+                  <span>Post a written handover note in the Slack or Teams channel.</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--primary)" />
-                  <span>ইমেইল অটো-রেসপন্ডার ও ক্যালেন্ডারে Out-of-Office সেট করুন।</span>
+                  <span>Set up the email auto-responder and Out-of-Office on your calendar.</span>
                 </li>
               </ul>
             </div>
@@ -502,20 +502,20 @@ Best regards,
               border: '1px solid var(--border-subtle)'
             }}>
               <h4 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--accent-amber)' }}>
-                ৩. ছুটির সময়ে সচেতনতা (During Absence)
+                3. Staying Off During Absence
               </h4>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-amber)" />
-                  <span>ব্যক্তিগত ফোন থেকে কাজের স্ল্যাক ও ইমেইল নোটিফিকেশন অফ রাখুন।</span>
+                  <span>Turn off work Slack and email notifications on your personal phone.</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-amber)" />
-                  <span>কঠোর নিয়ম: কেবল P1 প্রোডাকশন ডাউন হলে মোবাইলে ফোন করা যাবে।</span>
+                  <span>Strict rule: only call the mobile for a P1 production-down incident.</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="var(--accent-amber)" />
-                  <span>ছুটি শেষে সম্পূর্ণ ফুরফুরে মনে অফিসে ফিরুন।</span>
+                  <span>Return to the office fully refreshed once leave is over.</span>
                 </li>
               </ul>
             </div>
@@ -528,10 +528,10 @@ Best regards,
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ marginBottom: '0.5rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-              প্রফেশনাল আউট-অফ-অফিস (OOO) টেমপ্লেট
+              Professional Out-of-Office (OOO) Templates
             </h3>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              স্ল্যাক স্ট্যাটাস, ক্লায়েন্ট অটো-রেসপন্ডার এবং টিম মেমোর জন্য রেডিমেড টেমপ্লেট।
+              Ready-made templates for Slack status, client auto-responders, and team memos.
             </p>
           </div>
 
@@ -557,12 +557,12 @@ Best regards,
                     {copiedId === t.id ? (
                       <>
                         <Check size={14} color="var(--accent-emerald)" />
-                        <span style={{ color: 'var(--accent-emerald)' }}>কপি হয়েছে!</span>
+                        <span style={{ color: 'var(--accent-emerald)' }}>Copied!</span>
                       </>
                     ) : (
                       <>
                         <Copy size={14} />
-                        <span>কপি করুন</span>
+                        <span>Copy</span>
                       </>
                     )}
                   </button>
