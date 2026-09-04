@@ -1,6 +1,6 @@
 # LeaveMaster — Personal Employee Leave Management System
 
-A modern, offline-first personal leave management web application designed for employees. Built with **Next.js (Static Export)**, **TypeScript**, and **IndexedDB**, and deployed to **GitHub Pages**.
+A modern, offline-first personal leave management web application designed for employees. Built with **Next.js (Static Export)**, **TypeScript**, and **IndexedDB**, and deployed to **GitHub Pages**. 
 
 ---
 
