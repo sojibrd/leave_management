@@ -1,82 +1,52 @@
-# LeaveMaster — Personal Employee Leave Management System
+# leave_management — LeaveMaster
 
-A modern, offline-first personal leave management web application designed for employees. Built with **Next.js (Static Export)**, **TypeScript**, and **IndexedDB**, and deployed to **GitHub Pages**. 
+কর্মীর নিজের ব্যক্তিগত ছুটি ব্যবস্থাপনার offline-first ওয়েব অ্যাপ। সার্ভার বা ব্যাকএন্ড নেই — সব ডেটা ব্রাউজারের IndexedDB-তে।
 
----
+**লাইভ:** https://sojibrd.github.io/leave_management/
 
-## 🌟 Key Features
+## Functional Requirement
 
-1. **Client-Side Persistence (IndexedDB)**
-   - No cloud server or backend database required.
-   - All leaves, balances, and settings are saved securely inside your browser's IndexedDB.
-   - Full JSON **Backup** & **Restore** capability with zero data loss.
+- **ছুটির আবেদন:** তারিখ, ধরন আর কারণ দিয়ে আবেদন; অবস্থা `Pending` → `Approved` / `Rejected`।
+- **কর্মদিবসের হিসাব:** সাপ্তাহিক ছুটি (শুক্র-শনি, শনি-রবি বা কাস্টম) আর সরকারি ছুটি বাদ; অর্ধদিবস (সকাল/বিকেল) = ০.৫ দিন।
+- **ব্যালেন্স:** চার ধরন — Casual (CL ১০), Sick (SL ১৪), Annual (AL ১৫), Compensatory (CO ২); বছরশেষে carry forward নেই।
+- **ইমেইল নোটিশ:** আবেদন থেকে তৈরি ফরম্যাট করা নোটিশ; `mailto:`-এ খোলা বা clipboard-এ কপি।
+- **ছাপার ফর্ম:** A4 ফর্ম, আবেদনকারী, Department Head আর HR-এর সইয়ের ঘর সহ।
+- **৫টা ট্যাব:** Dashboard (circular balance card), Calendar (রঙে চিহ্নিত), History, Analytics (নির্বাচিত বছর, pure SVG), Expert Guide (holiday hack, edge case matrix, handover checklist, OOO টেমপ্লেট)।
+- **Settings:** কর্মীর তথ্য, প্রাপক (Manager `To:`, HR `Cc:`), সাপ্তাহিক ছুটি, বার্ষিক কোটা, সরকারি ছুটি।
+- **Backup/Restore:** পুরো ডেটাবেস JSON-এ export ও import; defaults-এ reset।
 
-2. **Smart Working Days Calculation**
-   - Automatically excludes weekly days off (e.g. Friday & Saturday or Saturday & Sunday) and public holidays.
-   - Half-day leave support (0.5 working days deduction for morning or afternoon sessions).
-   - Strict annual quota balances with **No Carry Forward** rule.
+## Non-Functional Requirement
 
-3. **Official Email Notice Generator**
-   - Application submission automatically generates a formatted notice:
-   ```text
-   Dear Mr. Adnan & HR Team,
+- **Offline-first, কোনো ব্যাকএন্ড নেই।** Dexie.js দিয়ে IndexedDB; ২০২৬-এর বাংলাদেশের ছুটি আগে থেকে বসানো।
+- **হিসাবের নিয়ম:** Approved আর Pending দুটোই ব্যালেন্স থেকে কাটে, Rejected নয়; overlap যাচাই; বছর পেরোনো ছুটি দুই বছরে ভাগ।
+- **কোনো বাইরের chart লাইব্রেরি নয়** — pure SVG।
+- **মোবাইল-উপযোগী:** ট্যাব অনুভূমিক স্ক্রল, History ≤৭৬৮px-এ card view, Calendar-এ dot আর tap popover।
+- **ডিফল্ট থিম Control Room** (dark, micro-grid, cyan accent)।
+- **Static export → GitHub Pages;** basePath আসে `NEXT_PUBLIC_BASE_PATH` থেকে।
+- **স্ট্যাক:** Next.js (App Router, `src/`), TypeScript, Dexie.js।
 
-   I am writing to formally request leave of absence from the office.
+## ডক ইনডেক্স
 
-   Leave Details:
-   - Leave Type: Casual Leave (CL)
-   - Duration: 15 Feb 2026 – 16 Feb 2026 (2 Working Days)
-   - Reason: Personal urgent matters
+| ফাইল | Gist |
+|---|---|
+| [docs/expert-leave-management-guide.md](docs/expert-leave-management-guide.md) | ছুটি ব্যবস্থাপনার প্রামাণ্য নির্দেশিকা: proactive দর্শন; সিস্টেম আর্কিটেকচার ও state machine; ৯টা edge case (overlap, উইকেন্ড সীমা, sandwich rule, বছর পেরোনো, কোটা শেষ/LOP, অর্ধদিবস, backdated, বাতিল ও কোটা ফেরত, মাল্টি-ট্যাব race); কর্মদিবস ও ব্যালেন্সের সূত্র; ২০২৬-এর holiday bridging, handover আর OOO প্রোটোকল |
+| [memory.md](memory.md) | শেষ সেশনের নোট (২০২৬-০৯-০৪): কী বানানো হয়েছে (DB, calculator, কম্পোনেন্ট, Expert Guide, Control-Room থিম), নেওয়া সিদ্ধান্ত, বর্তমান অবস্থা, পরের সেশনের শুরু, ভবিষ্যতের আইডিয়া |
+| [AGENTS.md](AGENTS.md) | কথোপকথন বাংলায়, technical term ইংরেজিতে; `next dev`-এর বসানো Next.js সতর্কতা |
 
-   During my absence, my colleague Jane Doe will handle urgent deliverables.
+## প্রজেক্ট-নির্দিষ্ট নিয়ম
 
-   I will resume work on 17 Feb 2026. In case of any urgent query, I will remain accessible via phone or email.
+- **কোথায় কী:**
+  - `src/lib/db.ts` — IndexedDB স্কিমা, seed ও backup/restore।
+  - `src/lib/calculator.ts` — কর্মদিবস, `calculateBalances`, `checkLeaveOverlap`, `splitCrossYearLeave`, `findOptimalHolidayBridges`।
+  - `src/lib/emailGenerator.ts` — নোটিশের লেখা।
+- **ইমেইল স্বাক্ষর:** নাম + পদবি + কোম্পানি; Employee ID বাদ।
+- **মেয়াদ শেষের সতর্কতা:** বাকি ব্যালেন্স > ০ আর বছরশেষের ৯০ দিনের কম বাকি — শুধু চলতি বছরে।
+- **ভবিষ্যৎ:** `legacy_and_wisdom`-এর Stage 3-এ এই প্রজেক্ট IndexedDB থেকে Postgres + auth-এ রূপান্তরিত হবে (নতুন প্রজেক্ট নয়)।
 
-   I kindly request you to approve my leave application.
+## চালানো
 
-   Thank you very much for your understanding and support.
-
-   Sincerely,
-   Sojib Das 
-   Software Engineer
-   Employee ID: EMP-1042
-   Product & Engineering
-   Acme Technologies Ltd.
-   ```
-   - One-click **Open in Mail Client** (`mailto:`) and **Copy to Clipboard**.
-
-4. **Paper-Ready Printable Form**
-   - Official A4 formatted document with signature fields for Applicant, Recommended by (Department Head), and Approved by (HR).
-
-5. **Interactive Dashboard & Calendar**
-   - Circular progress cards for Casual, Sick, Annual, and Compensatory leaves.
-   - Color-coded monthly calendar (Approved = Green, Pending = Amber, Holiday = Purple, Weekend = Muted).
-   - Application status management (`Pending` -> `Approved` / `Rejected`).
-
----
-
-## 🚀 Getting Started
-
-### Run Locally
 ```bash
 npm install
-npm run dev
+npm run dev     # http://localhost:3000
+npm run build   # static export → out/
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Build for Static Production / GitHub Pages
-```bash
-npm run build
-```
-Generates static HTML export files into the `./out` directory.
-
----
-
-## ⚙️ Configuration
-
-Click the **Settings** button in the dashboard to customize:
-- **Employee Information:** Name, Employee ID, Designation, Department, Company Name.
-- **Recipients:** Manager Name/Salutation (`Mr. Adnan`), Manager Email (`To:`), HR Email (`Cc:`).
-- **Office Weekends:** Toggle Friday & Saturday, Saturday & Sunday, or custom off-days.
-- **Annual Quotas:** Set custom days for Casual (CL), Sick (SL), Annual (AL), etc.
-- **Public Holidays:** View and add custom national or company holidays.
