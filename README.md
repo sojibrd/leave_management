@@ -41,7 +41,7 @@
   - `src/lib/emailGenerator.ts` — নোটিশের লেখা।
 - **ইমেইল স্বাক্ষর:** নাম + পদবি + কোম্পানি; Employee ID বাদ। Subject-এও Employee ID বাদ।
 - **মেয়াদ শেষের সতর্কতা:** বাকি ব্যালেন্স > ০ আর বছরশেষের ৯০ দিনের কম বাকি — শুধু চলতি বছরে।
-- **ভবিষ্যৎ:** `legacy_and_wisdom`-এর Stage 3-এ এই প্রজেক্ট IndexedDB থেকে Postgres + auth-এ রূপান্তরিত হবে (নতুন প্রজেক্ট নয়)।
+- **ভবিষ্যৎ:** `brainstorming/ASSUMPTIONS.md`-এর Stage 3-এ (২০২৮-১০ → ২০২৯-০৬) এই প্রজেক্ট IndexedDB থেকে Postgres + auth-এ রূপান্তরিত হবে (নতুন প্রজেক্ট নয়)।
 
 ## চালানো
 
