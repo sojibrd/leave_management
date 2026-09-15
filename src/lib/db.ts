@@ -1,7 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 import { LeaveRequest, LeaveType, UserSettings, Holiday } from '../types/leave';
 
-/* Category colours match system_design's control-room category-lamp set —
+/* Category colours match the control-room category-lamp set (system_design_local_company) —
    distinct signal colours read against the warm chassis without any of them
    needing to be the accent amber. */
 export const DEFAULT_LEAVE_TYPES: Omit<LeaveType, 'id'>[] = [

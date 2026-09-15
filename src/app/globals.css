@@ -1,5 +1,5 @@
 /* ============================================================================
-   THEME — Control Room (matches system_design's control-room aesthetic)
+   THEME — Control Room (matches the workspace control-room contract — system_design_local_company)
 
    Instrument-panel character: warm charcoal chassis, machined bezels,
    engraved mono labels, amber accent. Only lamps/status dots glow — panels,
@@ -125,7 +125,7 @@ h2, h3 {
 }
 
 /* Panel — a bezel-mounted plate. No blur, no gradient; depth comes from the
-   inset highlight over a drop shadow, same as system_design's surface-panel. */
+   inset highlight over a drop shadow, same as the contract's surface-panel. */
 .glass-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);

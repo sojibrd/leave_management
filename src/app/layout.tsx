@@ -6,7 +6,7 @@ import {
 } from 'next/font/google';
 import './globals.css';
 
-/* Same font family as system_design's control-room theme — condensed
+/* Same font family as the workspace control-room theme — condensed
    engraved sans for UI, mono for readouts/labels, Bengali for the guide
    content the Latin faces carry no glyphs for. */
 const condensed = Barlow_Semi_Condensed({
