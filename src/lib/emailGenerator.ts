@@ -17,7 +17,7 @@ export function generateLeaveEmailDraft(
     ? `${formatFriendlyDate(leave.startDate)} (${leave.isHalfDay ? `Half Day - ${leave.halfDayPeriod === 'first-half' ? 'First Half' : 'Second Half'}` : '1 Day'})`
     : `${formatFriendlyDateRange(leave.startDate, leave.endDate)} (${leave.totalDays} Working Days)`;
 
-  const subject = `Leave Application: ${leave.leaveTypeName} - ${settings.employeeName} (${settings.employeeId})`;
+  const subject = `Leave Application: ${leave.leaveTypeName} - ${settings.employeeName}`;
 
   const to = settings.managerEmail || '';
   const cc = settings.hrEmail || '';

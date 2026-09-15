@@ -13,6 +13,8 @@ interface EmailDraftModalProps {
   onOpenPrintView: (leave: LeaveRequest) => void;
 }
 
+type CopyField = 'to' | 'cc' | 'subject' | 'body' | 'all';
+
 export const EmailDraftModal: React.FC<EmailDraftModalProps> = ({
   isOpen,
   onClose,
@@ -20,28 +22,34 @@ export const EmailDraftModal: React.FC<EmailDraftModalProps> = ({
   settings,
   onOpenPrintView
 }) => {
-  const [copiedBody, setCopiedBody] = useState(false);
-  const [copiedSubject, setCopiedSubject] = useState(false);
+  const [copiedField, setCopiedField] = useState<CopyField | null>(null);
 
   if (!isOpen || !leave) return null;
 
   const draft = generateLeaveEmailDraft(leave, settings);
 
-  const handleCopyBody = () => {
-    navigator.clipboard.writeText(draft.body);
-    setCopiedBody(true);
-    setTimeout(() => setCopiedBody(false), 2000);
+  const handleCopy = (field: CopyField, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField((current) => (current === field ? null : current)), 2000);
   };
 
-  const handleCopySubject = () => {
-    navigator.clipboard.writeText(draft.subject);
-    setCopiedSubject(true);
-    setTimeout(() => setCopiedSubject(false), 2000);
-  };
+  const allText = [
+    ...(draft.to ? [`To: ${draft.to}`] : []),
+    ...(draft.cc ? [`Cc: ${draft.cc}`] : []),
+    `Subject: ${draft.subject}`,
+    '',
+    draft.body
+  ].join('\n');
 
   const handleOpenMailClient = () => {
     window.location.href = draft.mailtoUrl;
   };
+
+  const renderCopyIcon = (field: CopyField) =>
+    copiedField === field ? <Check size={12} color="var(--accent-emerald)" /> : <Copy size={12} />;
+
+  const smallCopyButtonStyle = { padding: '0.2rem 0.5rem', fontSize: '0.75rem' };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -91,16 +99,36 @@ export const EmailDraftModal: React.FC<EmailDraftModalProps> = ({
             fontSize: '0.8125rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-              <span style={{ fontWeight: 600, color: 'var(--text-secondary)', width: '60px' }}>To:</span>
-              <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)', width: '60px', flexShrink: 0 }}>To:</span>
+              <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
                 {draft.to || '<Not set in settings - configure manager email>'}
               </span>
+              <button
+                type="button"
+                onClick={() => handleCopy('to', draft.to)}
+                disabled={!draft.to}
+                className="btn btn-secondary btn-sm"
+                style={smallCopyButtonStyle}
+              >
+                {renderCopyIcon('to')}
+                <span>{copiedField === 'to' ? 'Copied' : 'Copy To'}</span>
+              </button>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontWeight: 600, color: 'var(--text-secondary)', width: '60px' }}>Cc:</span>
-              <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)', width: '60px', flexShrink: 0 }}>Cc:</span>
+              <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
                 {draft.cc || '<Not set in settings - configure HR email>'}
               </span>
+              <button
+                type="button"
+                onClick={() => handleCopy('cc', draft.cc)}
+                disabled={!draft.cc}
+                className="btn btn-secondary btn-sm"
+                style={smallCopyButtonStyle}
+              >
+                {renderCopyIcon('cc')}
+                <span>{copiedField === 'cc' ? 'Copied' : 'Copy Cc'}</span>
+              </button>
             </div>
           </div>
 
@@ -110,12 +138,12 @@ export const EmailDraftModal: React.FC<EmailDraftModalProps> = ({
               <label className="form-label" style={{ marginBottom: 0 }}>Subject Line</label>
               <button
                 type="button"
-                onClick={handleCopySubject}
+                onClick={() => handleCopy('subject', draft.subject)}
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                style={smallCopyButtonStyle}
               >
-                {copiedSubject ? <Check size={12} color="var(--accent-emerald)" /> : <Copy size={12} />}
-                <span>{copiedSubject ? 'Copied' : 'Copy Subject'}</span>
+                {renderCopyIcon('subject')}
+                <span>{copiedField === 'subject' ? 'Copied' : 'Copy Subject'}</span>
               </button>
             </div>
             <input
@@ -133,12 +161,12 @@ export const EmailDraftModal: React.FC<EmailDraftModalProps> = ({
               <label className="form-label" style={{ marginBottom: 0 }}>Message Body</label>
               <button
                 type="button"
-                onClick={handleCopyBody}
+                onClick={() => handleCopy('body', draft.body)}
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                style={smallCopyButtonStyle}
               >
-                {copiedBody ? <Check size={12} color="var(--accent-emerald)" /> : <Copy size={12} />}
-                <span>{copiedBody ? 'Copied Body' : 'Copy Body'}</span>
+                {renderCopyIcon('body')}
+                <span>{copiedField === 'body' ? 'Copied Body' : 'Copy Body'}</span>
               </button>
             </div>
             <textarea
@@ -182,6 +210,14 @@ export const EmailDraftModal: React.FC<EmailDraftModalProps> = ({
                 className="btn btn-secondary"
               >
                 Done
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopy('all', allText)}
+                className="btn btn-secondary"
+              >
+                {copiedField === 'all' ? <Check size={15} color="var(--accent-emerald)" /> : <Copy size={15} />}
+                <span>{copiedField === 'all' ? 'Copied All' : 'Copy All'}</span>
               </button>
               <button
                 id="btn-open-mailto"
