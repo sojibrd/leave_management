@@ -87,11 +87,76 @@ export class LeaveDatabase extends Dexie {
 export const db = new LeaveDatabase();
 
 /**
- * Initialize and seed initial data if DB is empty
+ * Seed the two demo leave records if the DB has none yet.
  */
-export async function initializeDatabase(): Promise<void> {
-  if (typeof window === 'undefined') return;
+export async function seedDemoLeavesIfEmpty(): Promise<void> {
+  const count = await db.leaves.count();
+  if (count !== 0) return;
 
+  const types = await db.leaveTypes.toArray();
+  // Guard: if no types seeded yet, skip — avoids crash
+  if (types.length < 2) return;
+  const cl = types.find((t) => t.code === 'CL') || types[0];
+  const sl = types.find((t) => t.code === 'SL') || types[1];
+  if (!cl || !sl) return;
+
+  const currentYearStr = String(new Date().getFullYear());
+
+  await db.leaves.add({
+    leaveTypeId: cl.id!,
+    leaveTypeName: cl.name,
+    leaveTypeCode: cl.code,
+    startDate: `${currentYearStr}-02-15`,
+    endDate: `${currentYearStr}-02-16`,
+    isHalfDay: false,
+    totalDays: 2,
+    reason: 'Attending sibling wedding ceremony in hometown',
+    backupPerson: 'Rafiqul Islam',
+    backupContact: 'rafiq@company.com',
+    status: 'approved',
+    appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString()
+  });
+
+  await db.leaves.add({
+    leaveTypeId: sl.id!,
+    leaveTypeName: sl.name,
+    leaveTypeCode: sl.code,
+    startDate: `${currentYearStr}-03-10`,
+    endDate: `${currentYearStr}-03-10`,
+    isHalfDay: true,
+    halfDayPeriod: 'second-half',
+    totalDays: 0.5,
+    reason: 'Dental checkup and routine consultation',
+    backupPerson: 'Tanvir Ahmed',
+    status: 'approved',
+    appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString()
+  });
+}
+
+/**
+ * Initialize and seed initial data if DB is empty.
+ *
+ * Single-flighted via `initPromise`: `page.tsx`'s mount effect can run twice
+ * back-to-back (React StrictMode dev double-invoke), and without this guard
+ * two concurrent runs each see "not seeded yet" and both insert — doubling
+ * every default leave type and demo leave. The promise is cleared once
+ * settled, so a later legitimate call (e.g. after a cloud-sync pull) still
+ * re-runs the cleanup pass on whatever was just imported.
+ */
+let initPromise: Promise<void> | null = null;
+
+export function initializeDatabase(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (initPromise) return initPromise;
+  initPromise = runInitializeDatabase().finally(() => {
+    initPromise = null;
+  });
+  return initPromise;
+}
+
+async function runInitializeDatabase(): Promise<void> {
   // Cleanup any duplicates if strict mode or past runs created them
   const existingList = await db.leaveTypes.toArray();
   const seenCodes = new Set<string>();
@@ -143,6 +208,8 @@ export async function initializeDatabase(): Promise<void> {
       value: DEFAULT_SETTINGS
     });
   }
+
+  await seedDemoLeavesIfEmpty();
 }
 
 /**

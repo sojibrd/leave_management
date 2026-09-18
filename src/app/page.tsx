@@ -5,6 +5,7 @@ import { LeaveRequest, LeaveType, LeaveStatus, UserSettings } from '../types/lea
 import {
   db,
   initializeDatabase,
+  seedDemoLeavesIfEmpty,
   getSettings,
   saveSettings,
   exportDatabaseToJson,
@@ -55,59 +56,10 @@ export default function LeaveManagementDashboard() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Seed sample records if database has 0 leaves on first open
-  const seedDemoLeavesIfEmpty = async () => {
-    const count = await db.leaves.count();
-    if (count === 0) {
-      const types = await db.leaveTypes.toArray();
-      // Guard: if no types seeded yet, skip — avoids crash
-      if (types.length < 2) return;
-      const cl = types.find((t) => t.code === 'CL') || types[0];
-      const sl = types.find((t) => t.code === 'SL') || types[1];
-      if (!cl || !sl) return;
-
-      const currentYearStr = String(new Date().getFullYear());
-
-      // Add 2 sample records
-      await db.leaves.add({
-        leaveTypeId: cl.id!,
-        leaveTypeName: cl.name,
-        leaveTypeCode: cl.code,
-        startDate: `${currentYearStr}-02-15`,
-        endDate: `${currentYearStr}-02-16`,
-        isHalfDay: false,
-        totalDays: 2,
-        reason: 'Attending sibling wedding ceremony in hometown',
-        backupPerson: 'Rafiqul Islam',
-        backupContact: 'rafiq@company.com',
-        status: 'approved',
-        appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15).toISOString(),
-        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString()
-      });
-
-      await db.leaves.add({
-        leaveTypeId: sl.id!,
-        leaveTypeName: sl.name,
-        leaveTypeCode: sl.code,
-        startDate: `${currentYearStr}-03-10`,
-        endDate: `${currentYearStr}-03-10`,
-        isHalfDay: true,
-        halfDayPeriod: 'second-half',
-        totalDays: 0.5,
-        reason: 'Dental checkup and routine consultation',
-        backupPerson: 'Tanvir Ahmed',
-        status: 'approved',
-        appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString()
-      });
-    }
-  };
-
   // Load all data
   const loadData = async () => {
     try {
       await initializeDatabase();
-      await seedDemoLeavesIfEmpty();
 
       const userSettings = await getSettings();
       const allTypes = await db.leaveTypes.toArray();
