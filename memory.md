@@ -1,51 +1,44 @@
-# Memory — LeaveMaster Personal Leave Management App
+# Memory — Cross-device sync via Supabase
 
-Last updated: 2026-09-04 04:58
+Last updated: 2026-09-18
 
 ## What was built
 
-### Core App (আগের সেশন থেকে)
-- **Full Next.js Static Export App** (`src/app/page.tsx`, `src/app/globals.css`)
-- **Client-Side Database** (`src/lib/db.ts`): Dexie.js IndexedDB, pre-seeded 2026 Bangladesh holidays, 4 leave types (CL:10, SL:14, AL:15, CO:2), JSON backup/restore
-- **Core Calculation Engine** (`src/lib/calculator.ts`): working day calc, half-day, `calculateBalances`, `checkLeaveOverlap`, `splitCrossYearLeave`, `findOptimalHolidayBridges`
-- **UI Components**: `Header.tsx`, `BalanceCards.tsx`, `ApplyLeaveModal.tsx`, `LeaveHistoryTable.tsx`, `CalendarView.tsx`, `SettingsModal.tsx`, `NotificationToast.tsx`
-- **Expert Guide Tab** (`ExpertGuideView.tsx`): Holiday Hacks (dynamic, upcoming-only), Edge Case Matrix, Handover Checklist, OOO Templates
-
-**Control-Room Theme Integration (AI):**
-- `src/app/globals.css`: Added deep mission-control palette (`--bg-app: #06090f`, `--bg-surface: #0c121e`, `--primary: #0284c7`, electric cyan `--accent-cyan: #00f0ff`, radar green `--accent-emerald: #10b981`), micro-grid background pattern (`radial-gradient`), HUD-like glow, updated gradient text to electric cyan/blue, updated primary buttons
-- `src/app/layout.tsx`: Default `data-theme="control-room"`
-- `src/app/page.tsx`: Integrated `'control-room'` theme state and toggle logic
-- `src/components/Header.tsx`: Control Room badge, updated theme toggle button with cyan sun icon
-- `src/types/leave.ts` & `src/lib/db.ts`: Added `'control-room'` to theme types and default settings
+- **`src/lib/supabase.ts`** — Supabase client factory; env var না থাকলে `null` (sync silently off, লোকাল IndexedDB আগের মতোই কাজ করে)।
+- **`src/lib/sync.ts`** — `useSyncKey()` (localStorage key `sync:v1:key`-এর জন্য get/generate/set) আর `useCloudSync(key, deps, reload)` (pull-on-mount + debounced push-on-change, দুটোই async, `pulledKeyRef`/`skipNextPushRef` দিয়ে race আটকানো)। বিদ্যমান `exportDatabaseToJson`/`importDatabaseFromJson` (backup ফিচারের জন্য আগে থেকে ছিল) পুনর্ব্যবহার করা হয়েছে push/pull payload হিসেবে — নতুন serialization লেখা লাগেনি।
+- **`src/app/page.tsx`** — `useSyncKey()` **একবারই** এখানে কল হয় (top-level source of truth), `useCloudSync(syncKey, {leaves, leaveTypes, settings}, loadData)` কল করে `syncStatus` পায়, আর `syncKey`/`ensureSyncKey`/`setSyncKey`/`syncStatus` prop হিসেবে `SettingsModal`-এ যায়।
+- **`src/components/SettingsModal.tsx`** — Database ট্যাবে নতুন "Cloud Sync (multi-device)" সেকশন: key দেখা/কপি/generate, "Use my own key" (custom key), "Pair with another device's key"। English UI (অ্যাপের নিজের ভাষা-convention অনুযায়ী, Bangla নয়)।
+- **`.github/workflows/deploy.yml`** — build step-এ `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` env var (repo secrets থেকে); দুটো secret `gh secret set` দিয়ে বসানো হয়েছে।
+- **`.env.local.example`** — খালি placeholder, কমিট করা (আসল `.env.local` gitignored)।
+- **`AGENTS.md`** — sync architecture-এর নোট যোগ।
+- Backend: workspace-এর বাকি ৯টা সাইটের সাথে **শেয়ার্ড** একই Supabase project/টেবিল (`progress_sync`), এখানে `site_prefix = "leave"`। বিস্তারিত ডিজাইন root workspace-এর `memory.md`-এ (dsa_prep_local_company pilot থেকে শুরু হওয়া বড় cross-repo কাজের অংশ এই repo)।
 
 ## Decisions made
 
-- **No carry-forward**: সব leave type Dec 31 expire
-- **Pending deducts balance**: Approved + Pending দুটোই count হয়, Rejected skip
-- **Expiry warning**: remaining > 0 AND < 90 days to year-end, current year only
-- **Suggestion chips**: click = replace (not append), collapse after selection
-- **Email signature**: Name + Designation + Company — Employee ID বাদ
-- **Analytics**: Selected year only, pure SVG (no Recharts)
-- **Charts**: no external chart library
-- **Mobile Navigation**: Horizontal scrollable tab bar with touch momentum
-- **Mobile History Table**: Native card view on `<=768px` instead of awkward 6-column horizontal scroll
-- **Mobile Calendar**: Dot indicators for leaves & holidays on `<=768px` with tap popover
-- **Default Theme**: Control Room (deep aerospace dark with subtle micro-grid and electric cyan accents)
+- **Local-first**: IndexedDB (Dexie) সবসময় primary; sync শুধু background layer, অফলাইনে অ্যাপ পুরোপুরি কাজ করে।
+- **Whole-blob last-write-wins** — পুরো backup JSON (settings + leaveTypes + leaves) একসাথে sync হয়, `updated_at` দিয়ে conflict resolve; field-level merge নয়।
+- **Auth-less sync key** — email/login নেই, key-ই capability; কেউ key জানলে ডেটা দেখতে/বদলাতে পারবে (personal-scale ঝুঁকি হিসেবে গ্রহণযোগ্য ধরা হয়েছে)।
+- **`useSyncKey()` একবারই কল হয়, prop দিয়ে ছড়ায়** — নিচের "Problems solved"-এ কারণ ব্যাখ্যা করা আছে।
+
+## Problems solved
+
+- **key generate করলে sync status আপডেট হচ্ছিল না** — `useSyncKey()` `page.tsx` (via `useCloudSync`) আর `SettingsModal.tsx`-এ আলাদা আলাদা কল হতো, প্রতিটার নিজের `useState` — একটাতে key লেখা হলে localStorage বদলায় ঠিকই, কিন্তু অন্যটার React state টের পায় না (dsa_prep সাইটগুলোর `useLocalStorage`-এর মতো cross-instance `useSyncExternalStore` pub/sub এখানে নেই)। Fix: `useSyncKey()` `page.tsx`-এ single source of truth, `key`/`ensureKey`/`setKey` prop হিসেবে `SettingsModal`-এ পাঠানো।
+- **ব্যর্থ push local-এ "synced" হিসেবে রেকর্ড হতো** — `writeLocal(META_STORAGE, ...)` upsert-এর ফলাফল না দেখেই কল হতো। Fix: `if (!error)`-এর ভেতরে সরানো।
+- **`react-hooks/set-state-in-effect` lint error** — effect body-তে সরাসরি `setState` (এমনকি async callback শুরুর আগে) কল করলেই error। Fix: `useSyncKey`-এর initial state lazy initializer (`useState(() => readLocal(...))`) দিয়ে, effect বাদ দিয়ে।
+- এই repo-তে **আগে থেকেই কিছু unrelated lint error ছিল** (`calculator.ts`, `db.ts`, `CalendarView.tsx`, `ExpertGuideView.tsx`, `LeaveHistoryTable.tsx`, `ApplyLeaveModal.tsx`-এ) — নতুন eslint-plugin-react-hooks rule পুরনো কোডে ধরা পড়েছে, এই সেশনের কাজ না, ছোঁয়া হয়নি। `next build` এগুলোতে block করে না (ESLint build-gate না)।
 
 ## Current state
 
-- ✅ `npm run dev` চলছে localhost:3000
-- ✅ Production build verified: `npm run build` exited with code 0
-- ✅ Full mobile responsive layout across all 5 tabs and 4 modal dialogs
-- ✅ Control-Room theme applied as primary theme
-
+- Commit `e56a0c4` push করা হয়েছে, GitHub Actions deploy সফল, লাইভ সাইটে (https://sojibrd.github.io/leave_management/) sync কাজ করছে।
+- Real browser (Playwright + system Chrome) + real Supabase দিয়ে end-to-end যাচাই করা: push confirmed (Supabase-এ row দেখা গেছে সঠিক ডেটাসহ), pull confirmed (আলাদা browser context "দ্বিতীয় ডিভাইস" হিসেবে key পেয়ার করে leave records + settings ঠিকমতো এসেছে)।
+- Console error শূন্য পুরো টেস্টে।
+- `npm install @supabase/supabase-js` করা আছে, `package.json`/`package-lock.json` কমিট করা।
 
 ## Next session starts with
 
-`git add -A && git commit -m "feat: full mobile responsive layout, touch-friendly navigation, mobile card history view, and compact calendar dots" && git push origin main`
-তারপর নতুন feature request অনুযায়ী কাজ শুরু।
+কিছু ব্লক করা নেই। sync ফিচার সম্পূর্ণ এবং deployed। নতুন কাজ চাইলে সরাসরি শুরু করা যাবে।
 
 ## Open questions
 
-- কোনো অমীমাংসিত বিষয় নেই।
-- ভবিষ্যতে বিবেচনা করা যেতে পারে: leave approval email notification, year-over-year analytics, user-editable reason suggestions
+- কোনো অমীমাংসিত বিষয় নেই এই ফিচার নিয়ে।
+- (আগের সেশনের) leave approval email notification, year-over-year analytics, user-editable reason suggestions — এখনো বিবেচনাধীন, অগ্রাধিকার নয়।
