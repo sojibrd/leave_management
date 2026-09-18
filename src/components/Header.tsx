@@ -12,6 +12,7 @@ interface HeaderProps {
   onYearChange: (year: number) => void;
   selectedYear: number;
   onOpenGuide?: () => void;
+  onLogoClick?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,7 +22,8 @@ export const Header: React.FC<HeaderProps> = ({
   onImportData,
   onYearChange,
   selectedYear,
-  onOpenGuide
+  onOpenGuide,
+  onLogoClick
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -44,36 +46,46 @@ export const Header: React.FC<HeaderProps> = ({
     }}>
       {/* Brand & Employee Profile */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{
-          width: '46px',
-          height: '46px',
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--bg-surface-elevated)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--primary)',
-          boxShadow: 'inset 0 1px 0 0 rgba(255, 236, 205, 0.1), 0 2px 0 0 rgba(0, 0, 0, 0.6)',
-          border: '1px solid var(--border-strong)'
-        }}>
-          <Calendar size={24} />
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-              Leave<span className="gradient-text">Master</span>
-            </h1>
-            <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: 'var(--primary-subtle)', color: 'var(--primary)', border: '1px solid rgba(255, 176, 32, 0.3)' }}>
-              Control Room
-            </span>
+        <button
+          type="button"
+          id="btn-header-brand"
+          className="header-brand-btn"
+          onClick={onLogoClick}
+          aria-label="Dashboard & Balances-এ যান"
+          title="Dashboard & Balances-এ যান"
+        >
+          <div className="header-brand-icon" style={{
+            width: '46px',
+            height: '46px',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-surface-elevated)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--primary)',
+            boxShadow: 'inset 0 1px 0 0 rgba(255, 236, 205, 0.1), 0 2px 0 0 rgba(0, 0, 0, 0.6)',
+            border: '1px solid var(--border-strong)',
+            transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+          }}>
+            <Calendar size={24} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-            <UserCheck size={14} color="var(--accent-emerald)" />
-            <span style={{ fontWeight: 600 }}>{settings.employeeName}</span>
-            <span style={{ color: 'var(--text-muted)' }}>•</span>
-            <span style={{ color: 'var(--text-muted)' }}>{settings.employeeId}</span>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+                Leave<span className="gradient-text">Master</span>
+              </h1>
+              <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: 'var(--primary-subtle)', color: 'var(--primary)', border: '1px solid rgba(255, 176, 32, 0.3)' }}>
+                Control Room
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+              <UserCheck size={14} color="var(--accent-emerald)" />
+              <span style={{ fontWeight: 600 }}>{settings.employeeName}</span>
+              <span style={{ color: 'var(--text-muted)' }}>•</span>
+              <span style={{ color: 'var(--text-muted)' }}>{settings.employeeId}</span>
+            </div>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Actions & Controls */}

@@ -285,6 +285,7 @@ export default function LeaveManagementDashboard() {
         onYearChange={setSelectedYear}
         selectedYear={selectedYear}
         onOpenGuide={() => setActiveTab('guide')}
+        onLogoClick={() => setActiveTab('dashboard')}
       />
 
       {/* Main Tabs Navigation - Touch Friendly & Horizontally Scrollable on Mobile */}
