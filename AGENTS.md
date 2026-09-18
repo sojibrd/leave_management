@@ -1,6 +1,7 @@
 
 ## Invariants
 - Conversation in bangla, but technical terms should be in english.
+- **Cross-device sync (২০২৬-০৯-১৮)** — IndexedDB (Dexie) সবসময় primary (offline-এ পুরোপুরি কাজ করে); Settings → Database ট্যাবে sync key বসানো থাকলে `src/lib/sync.ts` background-এ dsa_prep_local_company-এর pilot-এর মতো একই শেয়ার্ড Supabase `progress_sync` টেবিলে push/pull করে — এখানে `site_prefix = "leave"`, আর ডেটা `exportDatabaseToJson`/`importDatabaseFromJson`-এর (আগে থেকেই ছিল, backup/restore ফিচারের জন্য বানানো) পুরো blob। Conflict resolution: last-write-wins, `updated_at` দিয়ে। Sync key auth-less — `sync:v1:key` নামে localStorage-এ, workspace-এর dsa_prep/behavioural_interview/switch_in_6_month সাইটগুলোর সাথে origin-শেয়ার্ড (একই key সব জায়গায় কাজ করে, কারণ সবই `sojibrd.github.io`-র আলাদা path)। GitHub Actions build-এ `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` repo secret লাগে।
 
 <!-- BEGIN:nextjs-agent-rules -->
 

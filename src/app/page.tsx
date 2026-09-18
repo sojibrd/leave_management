@@ -13,6 +13,7 @@ import {
   DEFAULT_LEAVE_TYPES
 } from '../lib/db';
 import { calculateBalances } from '../lib/calculator';
+import { useCloudSync, useSyncKey } from '../lib/sync';
 import { Header } from '../components/Header';
 import { BalanceCards } from '../components/BalanceCards';
 import { CalendarView } from '../components/CalendarView';
@@ -137,6 +138,9 @@ export default function LeaveManagementDashboard() {
     setMounted(true);
     loadData();
   }, []);
+
+  const { key: syncKey, ensureKey: ensureSyncKey, setKey: setSyncKey } = useSyncKey();
+  const syncStatus = useCloudSync(syncKey, { leaves, leaveTypes, settings }, loadData);
 
   // Compute live balances
   const balances = useMemo(() => {
@@ -483,6 +487,10 @@ export default function LeaveManagementDashboard() {
         onSaveSettings={handleSaveSettings}
         onUpdateLeaveTypeQuota={handleUpdateLeaveTypeQuota}
         onResetDemoData={handleResetDemoData}
+        syncStatus={syncStatus}
+        syncKey={syncKey}
+        ensureSyncKey={ensureSyncKey}
+        setSyncKey={setSyncKey}
       />
     </div>
   );

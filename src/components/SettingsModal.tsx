@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Holiday, LeaveType, UserSettings } from '../types/leave';
-import { X, Save, User, Briefcase, Calendar, ShieldAlert, Plus, Trash2 } from 'lucide-react';
+import { X, Save, User, Briefcase, Calendar, ShieldAlert, Plus, Trash2, RefreshCw, Check } from 'lucide-react';
+import { type SyncStatus } from '../lib/sync';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -12,7 +13,18 @@ interface SettingsModalProps {
   onSaveSettings: (settings: UserSettings) => Promise<void>;
   onUpdateLeaveTypeQuota: (typeId: number, newQuota: number) => Promise<void>;
   onResetDemoData: () => Promise<void>;
+  syncStatus: SyncStatus;
+  syncKey: string | null;
+  ensureSyncKey: () => string;
+  setSyncKey: (next: string) => void;
 }
+
+const SYNC_STATUS_LABEL: Record<SyncStatus, string> = {
+  off: 'Sync is off — set a key below to turn it on',
+  syncing: 'Syncing…',
+  synced: 'Synced',
+  error: 'Sync failed — will retry once back online'
+};
 
 const WEEKDAYS = [
   { id: 0, label: 'Sunday' },
@@ -31,9 +43,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   leaveTypes,
   onSaveSettings,
   onUpdateLeaveTypeQuota,
-  onResetDemoData
+  onResetDemoData,
+  syncStatus,
+  syncKey,
+  ensureSyncKey,
+  setSyncKey
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'policy' | 'holidays' | 'data'>('profile');
+  const [pairDraft, setPairDraft] = useState('');
+  const [customMode, setCustomMode] = useState(false);
+  const [customDraft, setCustomDraft] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const copyKey = async () => {
+    const value = syncKey ?? ensureSyncKey();
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard ব্লক করা থাকলেও key নিচে দেখা যাচ্ছে, হাতে কপি করা যাবে
+    }
+  };
+
+  const pairWithKey = () => {
+    if (!pairDraft.trim()) return;
+    setSyncKey(pairDraft);
+    setPairDraft('');
+  };
+
+  const useCustomKey = () => {
+    if (!customDraft.trim()) return;
+    setSyncKey(customDraft);
+    setCustomDraft('');
+    setCustomMode(false);
+  };
   const [formData, setFormData] = useState<UserSettings>({ ...settings });
   const [quotas, setQuotas] = useState<Record<number, number>>(
     leaveTypes.reduce((acc, lt) => ({ ...acc, [lt.id!]: lt.totalQuota }), {})
@@ -476,6 +520,104 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 4: Database & Reset */}
           {activeTab === 'data' && (
             <div>
+              <div style={{
+                backgroundColor: 'var(--bg-surface-subtle)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1rem',
+                marginBottom: '1.25rem'
+              }}>
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.875rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+                  <RefreshCw size={14} color="var(--primary)" />
+                  Cloud Sync (multi-device)
+                </h4>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                  Copy this key on one device, paste it on another — both will share the same leave records. No
+                  login needed; this key is the only thing protecting your data, so don&apos;t share it. Works
+                  offline; syncs automatically once you&apos;re online.
+                </p>
+
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label">This device&apos;s key</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                    <code style={{
+                      flex: '1 1 220px',
+                      minWidth: 0,
+                      wordBreak: 'break-all',
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.45rem 0.6rem',
+                      fontSize: '0.75rem'
+                    }}>
+                      {syncKey ?? 'Not created yet'}
+                    </code>
+                    <button type="button" onClick={copyKey} className="btn btn-secondary btn-sm" style={{ flexShrink: 0 }}>
+                      {copied && <Check size={13} />}
+                      <span>{copied ? 'Copied' : syncKey ? 'Copy' : 'Generate key'}</span>
+                    </button>
+                    {!syncKey && !customMode && (
+                      <button
+                        type="button"
+                        onClick={() => setCustomMode(true)}
+                        className="btn btn-outline btn-sm"
+                        style={{ flexShrink: 0 }}
+                      >
+                        Use my own key
+                      </button>
+                    )}
+                  </div>
+                  {!syncKey && customMode && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                      <input
+                        type="text"
+                        className="form-input"
+                        style={{ flex: '1 1 200px', minWidth: '140px' }}
+                        placeholder="Type a key you'll remember"
+                        value={customDraft}
+                        onChange={(e) => setCustomDraft(e.target.value)}
+                      />
+                      <button type="button" onClick={useCustomKey} disabled={!customDraft.trim()} className="btn btn-primary btn-sm" style={{ flexShrink: 0 }}>
+                        Use this
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setCustomMode(false); setCustomDraft(''); }}
+                        className="btn btn-outline btn-sm"
+                        style={{ flexShrink: 0 }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                  {!syncKey && customMode && (
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                      Pick something memorable but hard to guess — anyone who knows this key can see and change this
+                      data.
+                    </p>
+                  )}
+                </div>
+
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <label className="form-label">Pair with another device&apos;s key</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ flex: '1 1 200px', minWidth: '140px' }}
+                      placeholder="Paste the key shown on the other device"
+                      value={pairDraft}
+                      onChange={(e) => setPairDraft(e.target.value)}
+                    />
+                    <button type="button" onClick={pairWithKey} disabled={!pairDraft.trim()} className="btn btn-secondary btn-sm" style={{ flexShrink: 0 }}>
+                      Pair
+                    </button>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status: {SYNC_STATUS_LABEL[syncStatus]}</p>
+              </div>
+
               <div style={{
                 backgroundColor: 'rgba(244, 63, 94, 0.08)',
                 border: '1px solid rgba(244, 63, 94, 0.25)',
