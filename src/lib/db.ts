@@ -17,7 +17,7 @@ export const DEFAULT_LEAVE_TYPES: Omit<LeaveType, 'id'>[] = [
   {
     code: 'SL',
     name: 'Sick Leave',
-    totalQuota: 14,
+    totalQuota: 10,
     color: '#e05646',
     bgColor: 'rgba(224, 86, 70, 0.12)',
     borderColor: 'rgba(224, 86, 70, 0.35)',
@@ -26,7 +26,7 @@ export const DEFAULT_LEAVE_TYPES: Omit<LeaveType, 'id'>[] = [
   {
     code: 'AL',
     name: 'Annual / Earned Leave',
-    totalQuota: 15,
+    totalQuota: 10,
     color: '#52c07a',
     bgColor: 'rgba(82, 192, 122, 0.12)',
     borderColor: 'rgba(82, 192, 122, 0.35)',
@@ -35,7 +35,7 @@ export const DEFAULT_LEAVE_TYPES: Omit<LeaveType, 'id'>[] = [
   {
     code: 'CO',
     name: 'Compensatory Leave',
-    totalQuota: 2,
+    totalQuota: 0,
     color: '#a97ad6',
     bgColor: 'rgba(169, 122, 214, 0.12)',
     borderColor: 'rgba(169, 122, 214, 0.35)',
@@ -87,63 +87,14 @@ export class LeaveDatabase extends Dexie {
 export const db = new LeaveDatabase();
 
 /**
- * Seed the two demo leave records if the DB has none yet.
- */
-export async function seedDemoLeavesIfEmpty(): Promise<void> {
-  const count = await db.leaves.count();
-  if (count !== 0) return;
-
-  const types = await db.leaveTypes.toArray();
-  // Guard: if no types seeded yet, skip — avoids crash
-  if (types.length < 2) return;
-  const cl = types.find((t) => t.code === 'CL') || types[0];
-  const sl = types.find((t) => t.code === 'SL') || types[1];
-  if (!cl || !sl) return;
-
-  const currentYearStr = String(new Date().getFullYear());
-
-  await db.leaves.add({
-    leaveTypeId: cl.id!,
-    leaveTypeName: cl.name,
-    leaveTypeCode: cl.code,
-    startDate: `${currentYearStr}-02-15`,
-    endDate: `${currentYearStr}-02-16`,
-    isHalfDay: false,
-    totalDays: 2,
-    reason: 'Attending sibling wedding ceremony in hometown',
-    backupPerson: 'Rafiqul Islam',
-    backupContact: 'rafiq@company.com',
-    status: 'approved',
-    appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString()
-  });
-
-  await db.leaves.add({
-    leaveTypeId: sl.id!,
-    leaveTypeName: sl.name,
-    leaveTypeCode: sl.code,
-    startDate: `${currentYearStr}-03-10`,
-    endDate: `${currentYearStr}-03-10`,
-    isHalfDay: true,
-    halfDayPeriod: 'second-half',
-    totalDays: 0.5,
-    reason: 'Dental checkup and routine consultation',
-    backupPerson: 'Tanvir Ahmed',
-    status: 'approved',
-    appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString()
-  });
-}
-
-/**
  * Initialize and seed initial data if DB is empty.
  *
  * Single-flighted via `initPromise`: `page.tsx`'s mount effect can run twice
  * back-to-back (React StrictMode dev double-invoke), and without this guard
  * two concurrent runs each see "not seeded yet" and both insert — doubling
- * every default leave type and demo leave. The promise is cleared once
- * settled, so a later legitimate call (e.g. after a cloud-sync pull) still
- * re-runs the cleanup pass on whatever was just imported.
+ * every default leave type. The promise is cleared once settled, so a later
+ * legitimate call (e.g. after a cloud-sync pull) still re-runs the cleanup
+ * pass on whatever was just imported.
  */
 let initPromise: Promise<void> | null = null;
 
@@ -208,8 +159,6 @@ async function runInitializeDatabase(): Promise<void> {
       value: DEFAULT_SETTINGS
     });
   }
-
-  await seedDemoLeavesIfEmpty();
 }
 
 /**

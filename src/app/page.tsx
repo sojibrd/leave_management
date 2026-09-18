@@ -5,7 +5,6 @@ import { LeaveRequest, LeaveType, LeaveStatus, UserSettings } from '../types/lea
 import {
   db,
   initializeDatabase,
-  seedDemoLeavesIfEmpty,
   getSettings,
   saveSettings,
   exportDatabaseToJson,
@@ -222,7 +221,6 @@ export default function LeaveManagementDashboard() {
         }
       });
       await saveSettings(DEFAULT_SETTINGS);
-      await seedDemoLeavesIfEmpty();
       await loadData();
       showToast('Database reset to defaults.', 'info');
     } catch (err) {
